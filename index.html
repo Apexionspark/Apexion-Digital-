@@ -891,9 +891,226 @@ body.dark-mode .cinc-amt { color: #86efac !important; }
 /* Calendar legend text */
 body.dark-mode .cal-legend span { color: #cccccc !important; }
 
+
+/* ══ KEY LOGIN SCREEN ══ */
+#keyScreen {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #0F1923 0%, #1A2535 60%, #0F1923 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  padding: 20px;
+}
+.key-box {
+  background: #1A1D27;
+  border-radius: 20px;
+  padding: 40px 36px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 25px 60px rgba(0,0,0,.5);
+  border: 1px solid rgba(107,143,113,.2);
+  text-align: center;
+  animation: keyIn .4s ease;
+}
+@keyframes keyIn {
+  from { opacity:0; transform:translateY(30px); }
+  to { opacity:1; transform:translateY(0); }
+}
+.key-logo {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #3D5C40, #6B8F71);
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  margin: 0 auto 18px;
+  box-shadow: 0 8px 24px rgba(61,92,64,.4);
+}
+.key-title {
+  font-family: Georgia, serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+.key-sub {
+  font-size: .83rem;
+  color: rgba(255,255,255,.4);
+  margin-bottom: 30px;
+  line-height: 1.5;
+}
+.key-label {
+  font-size: .72rem;
+  font-weight: 700;
+  color: rgba(134,239,172,.6);
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  text-align: left;
+  display: block;
+  margin-bottom: 8px;
+}
+.key-input {
+  width: 100%;
+  background: rgba(255,255,255,.07);
+  border: 2px solid rgba(255,255,255,.1);
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 1.2rem;
+  color: #ffffff;
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  outline: none;
+  margin-bottom: 18px;
+  transition: .2s;
+  text-align: center;
+  letter-spacing: .15em;
+  min-height: 56px;
+  text-transform: uppercase;
+}
+.key-input:focus {
+  border-color: #6B8F71;
+  background: rgba(107,143,113,.1);
+  box-shadow: 0 0 0 4px rgba(107,143,113,.15);
+}
+.key-input::placeholder {
+  color: rgba(255,255,255,.2);
+  letter-spacing: .05em;
+  font-size: .9rem;
+  font-weight: 400;
+  text-transform: none;
+}
+.key-btn {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, #3D5C40, #6B8F71);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: .2s;
+  min-height: 52px;
+  box-shadow: 0 4px 20px rgba(61,92,64,.4);
+  letter-spacing: .03em;
+}
+.key-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(61,92,64,.5);
+}
+.key-btn:active { transform: translateY(0); }
+.key-error {
+  background: rgba(201,107,107,.15);
+  border: 1px solid rgba(201,107,107,.3);
+  color: #fca5a5;
+  padding: 11px 14px;
+  border-radius: 8px;
+  font-size: .83rem;
+  margin-bottom: 14px;
+  display: none;
+  text-align: left;
+}
+.key-divider {
+  border: none;
+  border-top: 1px solid rgba(255,255,255,.08);
+  margin: 22px 0;
+}
+.key-purchase {
+  font-size: .76rem;
+  color: rgba(255,255,255,.3);
+  line-height: 1.7;
+}
+.key-purchase a {
+  color: #86efac;
+  text-decoration: none;
+  font-weight: 600;
+}
+.key-features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.key-feature {
+  background: rgba(255,255,255,.05);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: .73rem;
+  color: rgba(255,255,255,.5);
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.key-feature span { color: #86efac; }
+@media(max-width:480px) {
+  .key-box { padding: 28px 20px; }
+  .key-title { font-size: 1.4rem; }
+  .key-features { grid-template-columns: 1fr; }
+}
+
+
+/* SYNC INDICATOR */
+.sync-indicator {
+  position: fixed;
+  top: 12px;
+  right: 14px;
+  background: rgba(61,92,64,.95);
+  color: #86efac;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: .72rem;
+  font-weight: 700;
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  gap: 6px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 12px rgba(0,0,0,.2);
+  transition: opacity .3s;
+}
+.sync-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #86efac;
+  animation: syncPulse 1.2s infinite;
+}
+@keyframes syncPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
+
 </style>
 
 
+<link rel="manifest" href="data:application/json,{
+  %22name%22:%22Apexion Finance%22,
+  %22short_name%22:%22Apexion%22,
+  %22start_url%22:%22/%22,
+  %22display%22:%22standalone%22,
+  %22background_color%22:%22%230F1923%22,
+  %22theme_color%22:%22%232E5C3F%22,
+  %22description%22:%22Premium Budget Planner%22,
+  %22icons%22:[{%22src%22:%22data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%230F1923' width='192' height='192' rx='38'/><text x='50%25' y='54%25' font-size='90' font-weight='bold' fill='%2386efac' text-anchor='middle' dominant-baseline='middle'>⬡</text></svg>%22,%22sizes%22:%22192x192%22,%22type%22:%22image/svg+xml%22}]
+}">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Apexion Finance">
+<meta name="application-name" content="Apexion Finance">
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+<style>
+
+</style>
+
+<!-- Firebase SDK for cross-device sync -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -903,6 +1120,82 @@ body.dark-mode .cal-legend span { color: #cccccc !important; }
   <span id="darkIcon">🌙</span>
   <span id="darkTxt">Dark Mode</span>
 </button>
+
+
+<div id="pwa-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#0F1923,#1A2535);padding:14px 18px;box-shadow:0 -4px 20px rgba(0,0,0,.3);border-top:1px solid rgba(134,239,172,.2)">
+  <div style="display:flex;align-items:center;gap:12px;max-width:600px;margin:0 auto">
+    <div style="width:40px;height:40px;background:linear-gradient(135deg,#3D5C40,#6B8F71);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0">⬡</div>
+    <div style="flex:1">
+      <div style="font-size:.85rem;font-weight:700;color:#ffffff">Install Apexion Finance</div>
+      <div style="font-size:.72rem;color:rgba(255,255,255,.6);margin-top:2px">Add to home screen for easy access anytime</div>
+    </div>
+    <button onclick="installPWA()" style="background:#2E5C3F;color:#fff;border:none;padding:9px 16px;border-radius:8px;font-size:.8rem;font-weight:700;cursor:pointer;flex-shrink:0">Install</button>
+    <button onclick="document.getElementById('pwa-banner').style.display='none'" style="background:transparent;color:rgba(255,255,255,.4);border:none;font-size:1.2rem;cursor:pointer;padding:4px;flex-shrink:0">✕</button>
+  </div>
+</div>
+
+
+
+
+<!-- ══ KEY LOGIN SCREEN ══ -->
+
+<!-- SYNC INDICATOR -->
+<div class="sync-indicator" id="syncIndicator">
+  <div class="sync-dot"></div>
+  <span id="syncMsg">Syncing...</span>
+</div>
+
+<div id="keyScreen">
+  <div class="key-box">
+    <div class="key-logo">⬡</div>
+    <div class="key-title">Apexion Finance</div>
+    <div class="key-sub">Premium Budget Planner<br>Enter your access key to continue</div>
+
+    <div class="key-features">
+      <div class="key-feature"><span>📊</span> Dashboard</div>
+      <div class="key-feature"><span>💳</span> Expenses</div>
+      <div class="key-feature"><span>🏧</span> Savings</div>
+      <div class="key-feature"><span>📈</span> Investments</div>
+      <div class="key-feature"><span>🌍</span> Tax Calculator</div>
+      <div class="key-feature"><span>🌙</span> Dark Mode</div>
+    </div>
+
+    <div class="key-error" id="keyError">
+      ❌ Invalid access key. Please check and try again.
+    </div>
+
+    <label class="key-label">🪪 Customer ID</label>
+    <input 
+      class="key-input" 
+      type="text" 
+      id="keyInput" 
+      placeholder="e.g. APX-XXXX-XXXX"
+      maxlength="15"
+      autocomplete="off"
+      spellcheck="false"
+      onkeydown="if(event.key==='Enter') document.getElementById('passInput').focus()"
+    >
+    <label class="key-label" style="margin-top:4px">🔑 Password</label>
+    <input 
+      class="key-input" 
+      type="password" 
+      id="passInput" 
+      placeholder="Enter your password"
+      maxlength="12"
+      autocomplete="off"
+      onkeydown="if(event.key==='Enter') checkKey()"
+    >
+    <button class="key-btn" onclick="checkKey()" id="keyBtn">
+      🔓 Unlock Apexion Finance
+    </button>
+
+    <hr class="key-divider">
+    <div class="key-purchase">
+      Don't have an access key?<br>
+      <a href="https://www.etsy.com" target="_blank">Purchase at our Etsy store →</a>
+    </div>
+  </div>
+</div>
 
 <div class="topbar" id="topbar">
   <button class="hbtn" id="hbtn" onclick="toggleSB()"><span></span><span></span><span></span></button>
@@ -2771,10 +3064,805 @@ function rInvest() {
   }).join('');
 }
 
+
+
+
+// ══════════════════════════════════════════════
+// ACCESS KEY SYSTEM
+// ══════════════════════════════════════════════
+// ADD YOUR SECRET KEYS BELOW
+// Each key = one customer license
+// Format: "KEY": true
+// To revoke: change true to false
+// ══════════════════════════════════════════════
+
+const VALID_KEYS = {
+  "APX-TWRF-A9UC": "KB29db05",
+  "APX-2GGY-98W7": "JXvtgh07",
+  "APX-TM9Q-J4U4": "HL3ry256",
+  "APX-U254-MTVF": "GHnuxj26",
+  "APX-EMZV-3TUS": "KJhvsu62",
+  "APX-GEQU-2JAU": "EDfyzj91",
+  "APX-WZE8-H23C": "NFp33x52",
+  "APX-6MYS-MRJC": "YHswwp37",
+  "APX-886E-5LZR": "ENcfm308",
+  "APX-7DXV-LKXV": "EBpvzj23",
+  "APX-6Q69-BAT4": "TMe6w483",
+  "APX-MBC5-K377": "LP6hmn70",
+  "APX-4TQK-MJXA": "QHxbx936",
+  "APX-B5M9-LMEE": "QFasr926",
+  "APX-9P7E-X4HP": "NDxygs83",
+  "APX-RNBK-AMEK": "VA97ye17",
+  "APX-V8DB-29ED": "UEnkzs18",
+  "APX-GHTK-9WU8": "LRx8w803",
+  "APX-6EYG-SQVD": "UHddf316",
+  "APX-LUWJ-4ZX6": "RGeat705",
+  "APX-VLEY-MXWL": "PEzdrf97",
+  "APX-K33E-7LZP": "EMj2ff56",
+  "APX-BBYW-ED2U": "MDkenb55",
+  "APX-MKQK-X643": "FEej5706",
+  "APX-K8BD-453M": "CRstrq16",
+  "APX-SUDK-PUF5": "FJ7sdp10",
+  "APX-YV27-WPXR": "NWthab86",
+  "APX-B65C-J6RB": "JVzehp94",
+  "APX-T9NT-GUPU": "NFuhjg49",
+  "APX-XNFY-QVPF": "APbkfv68",
+  "APX-TL3K-J9DK": "QRmk7f34",
+  "APX-XLV6-C3F4": "DU789q28",
+  "APX-4EDD-LDTD": "FXfqbh43",
+  "APX-AM3G-PD7E": "VTnqvj18",
+  "APX-VNJH-BFYN": "SJvqt404",
+  "APX-BT9C-DF29": "YXn58d23",
+  "APX-C52P-234A": "CPd44n47",
+  "APX-5A9R-A69C": "RZgspt11",
+  "APX-HB3P-89AC": "BQsf3p82",
+  "APX-S7GV-GVFX": "TQvky321",
+  "APX-3RQE-8WZW": "MU6jf789",
+  "APX-99YL-VYTP": "DZezgs20",
+  "APX-8FAZ-LFZB": "RTzubw51",
+  "APX-A6FR-EEGP": "FJgdj492",
+  "APX-AJC5-PA92": "ZQmgnu11",
+  "APX-C8QL-KA5F": "CKhdxa18",
+  "APX-4HXJ-LAD2": "UZ2wag91",
+  "APX-VFR7-GVBW": "QH632z28",
+  "APX-QLU5-4J9W": "SWvay437",
+  "APX-F7AS-L2Q7": "HLkrc819",
+  "APX-Z2J3-M9BB": "NGa32v67",
+  "APX-2JVR-XMBQ": "EKmtyz47",
+  "APX-9ZVY-ZH9S": "HQ2bqv02",
+  "APX-6L72-KA4X": "DPxtwv47",
+  "APX-RM8H-W2VU": "MSmauw91",
+  "APX-ME2G-SAVK": "HSgt7b52",
+  "APX-5YJY-B2J5": "ZXyzms56",
+  "APX-A4VV-VSMM": "KLwxya53",
+  "APX-CBCY-H9BY": "ACdwgj93",
+  "APX-QAML-Y5UF": "LXcw8h22",
+  "APX-V7MR-PYYX": "GSvjrq42",
+  "APX-LYUC-MCJ3": "BF25we35",
+  "APX-QR69-PYNP": "XCehu962",
+  "APX-VKDT-G4AQ": "WYx9u342",
+  "APX-JXKG-4H69": "PTczc314",
+  "APX-2JQK-TUKQ": "GZfe8e51",
+  "APX-U5PD-64PN": "ZWp9fa77",
+  "APX-Z8MT-KP5R": "JLrkhw95",
+  "APX-VTEK-9ZNS": "SL9mup91",
+  "APX-QK46-UTFT": "HW2hs225",
+  "APX-M6QH-AM2F": "KZutd495",
+  "APX-N28C-CPP4": "EK3snx52",
+  "APX-8WKB-ZZ7F": "QF59yb91",
+  "APX-KPEU-QQZU": "VSbqpq84",
+  "APX-HRE8-48G5": "LCua8w44",
+  "APX-2XC4-HQEU": "WHdwkt91",
+  "APX-LG4E-4RJ4": "SGhz9939",
+  "APX-ZCUN-Y8CR": "AYmzwq04",
+  "APX-RDAH-GJ7M": "DF7s8c54",
+  "APX-BA8H-7GEN": "XEynar63",
+  "APX-5P4A-FMGK": "GLbwjg51",
+  "APX-CZF7-YS6Q": "PS9y2h70",
+  "APX-69EE-C8SA": "MS59mm33",
+  "APX-GNU6-QXTA": "DYx6n290",
+  "APX-CTAN-WXCQ": "FUuhzz80",
+  "APX-WRP3-2VLT": "VB2ffq09",
+  "APX-PKZL-932D": "HNjygt44",
+  "APX-5EQQ-34NP": "LEzyzc49",
+  "APX-C48Q-GPKM": "PNnpnf24",
+  "APX-TGVC-YF9H": "GTdmr344",
+  "APX-WVPZ-QC5J": "ZX998b34",
+  "APX-AQEH-G6A6": "VU8kup01",
+  "APX-NB24-MYNK": "VWvpaj34",
+  "APX-RXHN-AHLG": "VQegbd23",
+  "APX-U32L-YMCT": "ZKznfc44",
+  "APX-H4PZ-GZAT": "DPtqk609",
+  "APX-RVW3-U4K6": "NKdwcz57",
+  "APX-N7W5-D42C": "QY4gcn90",
+  "APX-AYXF-34BF": "QAkkz846",
+  "APX-57PG-5MM5": "KLx2vh05",
+  "APX-LTGQ-H59C": "RMw9su72",
+  "APX-HAQP-HBWX": "DXqzyp78",
+  "APX-LPCT-VPUY": "NL2exs81",
+  "APX-9BKK-64N2": "GMb3v618",
+  "APX-6HM8-5GDS": "TQ78y389",
+  "APX-EU88-WLJF": "CYr86960",
+  "APX-XVJH-93Z6": "NR5yrb94",
+  "APX-DWSY-SV38": "QKwmtp27",
+  "APX-B877-KW93": "MXgtm604",
+  "APX-AJEJ-W79M": "YFpqwd95",
+  "APX-S86U-5EFP": "KN6v7371",
+  "APX-Q23H-FPS9": "JXe7c588",
+  "APX-HTKT-W7WK": "BUnpdd75",
+  "APX-83HR-AVD8": "XCnkxr94",
+  "APX-YE8S-246D": "WYm3es16",
+  "APX-DDTN-MVEJ": "LDc7rm39",
+  "APX-8J5R-VM9S": "FMzea868",
+  "APX-YMR3-MMED": "MC4mec79",
+  "APX-QQR4-TRGY": "GKbvj476",
+  "APX-DB7E-7AH7": "CH79rf01",
+  "APX-CTBN-BE5B": "ESp5av37",
+  "APX-WU8X-2ZRZ": "LJbe3394",
+  "APX-2L4X-66Y4": "XBzb4s17",
+  "APX-3K29-783E": "SCeuk614",
+  "APX-EBAJ-6U3N": "XEje2r49",
+  "APX-KM2K-SWZG": "JDdyqu29",
+  "APX-K6RM-3EWP": "SK4ajz93",
+  "APX-N274-JKLA": "CFrhhm97",
+  "APX-939U-JXQM": "GNe2fq26",
+  "APX-QGEF-JD7N": "VUq3fz45",
+  "APX-7J9E-XWCR": "BRhkxz87",
+  "APX-EZTM-69UJ": "YC89sv03",
+  "APX-VERS-R3LN": "GZkb9775",
+  "APX-J2JR-E56G": "NTgjkf01",
+  "APX-S9XA-77EA": "PAfazt70",
+  "APX-XU72-76ZV": "FWqp8h26",
+  "APX-M5FM-PBWG": "CNmsc274",
+  "APX-XQG4-V9Q8": "UMsw4y78",
+  "APX-V7BS-SUQL": "LCge6s00",
+  "APX-KQJ4-HSZQ": "ULa9ye05",
+  "APX-RL8E-LR3N": "MEwhcs61",
+  "APX-73P7-PKLC": "HHarat93",
+  "APX-CF4X-56GN": "QXdx5h40",
+  "APX-UVF2-H3UC": "CN8xm816",
+  "APX-HJTQ-CPDW": "LRwy3b22",
+  "APX-WJ94-2GXH": "DSctr300",
+  "APX-TXED-Z8VU": "KHgs2q40",
+  "APX-H9AU-8L5N": "YCbwue99",
+  "APX-BH6F-NRV7": "LTp48f74",
+  "APX-3WD6-ZNVY": "PZ8mh690",
+  "APX-QDTB-3ZTY": "LMsu4800",
+  "APX-MPBY-SFBZ": "ZE3ncs40",
+  "APX-5B8X-LTX6": "VGatn925",
+  "APX-Q65R-V6EP": "YAuwps83",
+  "APX-Y7KY-F79C": "VEg5ra66",
+  "APX-H2JP-ULQN": "JZ4thp21",
+  "APX-DX8R-V5P8": "ARjgkq44",
+  "APX-83C2-ZD84": "XPzc3m65",
+  "APX-FK7W-2N3C": "CNuuej03",
+  "APX-3DZB-2GAC": "ATtsqx66",
+  "APX-NT3Q-29JL": "DQx6td54",
+  "APX-VD83-XYG9": "WW94kn54",
+  "APX-78QP-AK7E": "HGgzax50",
+  "APX-9BRX-EKAU": "WX5rhx18",
+  "APX-HURD-EBMG": "HQgpbb57",
+  "APX-PJPK-27LZ": "KYb2dq46",
+  "APX-WPVM-6AGZ": "AHnafx38",
+  "APX-KLL8-CYKB": "KLmdqt85",
+  "APX-8TEA-A6HU": "EEbqhe05",
+  "APX-XGF6-ANZE": "WV4d3h42",
+  "APX-G9NX-CM9E": "AQbts755",
+  "APX-NMV8-J4RK": "NCv9ct93",
+  "APX-D3RZ-5NSD": "MMawr359",
+  "APX-GPS2-PRTB": "MDn77586",
+  "APX-H24J-GKRY": "VRreny40",
+  "APX-QSLR-HL24": "GQyekr82",
+  "APX-B8YU-5UAN": "HM664g90",
+  "APX-JWVV-Z3HF": "AYnqav92",
+  "APX-TP6Q-J8M9": "SN8eg924",
+  "APX-Y9B3-KET9": "HKykxm61",
+  "APX-58MN-6BAS": "ALgkrb45",
+  "APX-HRHJ-4ALW": "PNk7m720",
+  "APX-TH2D-8KLX": "BLhz5r89",
+  "APX-5RLM-HVR6": "MYeb5k59",
+  "APX-J6A4-GUKJ": "XV55yx62",
+  "APX-C6RS-C8LL": "GZsh4377",
+  "APX-C93H-24QV": "VJ6wbk61",
+  "APX-WHVT-E3TV": "ZEk3wr23",
+  "APX-4MTL-9BYF": "LC6jde09",
+  "APX-BXFE-46PC": "AX76dx34",
+  "APX-GXPD-FSH7": "SWzvna97",
+  "APX-4HNU-FEXF": "AP5nxs10",
+  "APX-NCMU-8BFB": "YGsrz696",
+  "APX-3E7T-ANQG": "NSmums12",
+  "APX-AYVF-T39S": "FHtjan10",
+  "APX-NQ8L-VXVV": "XTjtyu28",
+  "APX-NPQW-AN8E": "BKv6r357",
+  "APX-6YAZ-A9VH": "BY7wda03",
+  "APX-KH3A-7EWU": "FPvf3617",
+  "APX-M2SG-24FY": "UX9dx570",
+  "APX-JRDW-QHLS": "JRsku696",
+  "APX-6EW7-DZ4W": "FAfdw755",
+  "APX-BTM7-5PAL": "VHbhtz20",
+  "APX-GVAY-BQFD": "ML3dc418",
+  "APX-XN72-7NU7": "VMzpv800",
+  "APX-6GLZ-AXV4": "QEyjay49",
+  "APX-PTWA-85YQ": "VQzsxc45",
+  "APX-NJRN-22ZT": "ZAsq3u71",
+  "APX-ADJ5-HZ87": "YMmttx52",
+  "APX-WLYJ-SMGD": "JVr5xx78",
+  "APX-U9MW-J8X5": "HMec5q89",
+  "APX-HVLZ-J829": "YG8wj623",
+  "APX-PUJY-VGYR": "SCnsa754",
+  "APX-U6M4-8Z2J": "DUpj2t82",
+  "APX-82GK-VB4X": "ECc86c27",
+  "APX-CSXT-6F6A": "DRue9b50",
+  "APX-HWRD-G5KC": "EVys4s44",
+  "APX-JPCK-AF6Z": "QCayg938",
+  "APX-2ETJ-UFJA": "AAwxgp83",
+  "APX-6CAG-D3W7": "DZxttx10",
+  "APX-USF8-VVAN": "PSy82z38",
+  "APX-UFZV-G4JH": "PTtpky42",
+  "APX-PCY3-MHQ4": "CHt7fq48",
+  "APX-HRZA-MTUJ": "EPug3689",
+  "APX-7CQZ-ZZ7H": "NCf55530",
+  "APX-KNE9-MK9Q": "HP5dqu46",
+  "APX-Y9PA-UMBM": "JJw7qy62",
+  "APX-26GW-TF2E": "XC9c7x20",
+  "APX-HTJP-WCFQ": "ZTb4x291",
+  "APX-TVVJ-AE6F": "DYvmn485",
+  "APX-EMZU-YZVT": "KAszhy37",
+  "APX-N2RV-DU68": "MLbpg894",
+  "APX-Z25D-PJ44": "HMmuve01",
+  "APX-VNQ5-5TFX": "EK6phs75",
+  "APX-GSFB-G9R8": "RRgd2t95",
+  "APX-NLN6-2X92": "FZ3b5u32",
+  "APX-WTRP-Y9C5": "GU7add24",
+  "APX-LRUJ-AYNH": "QTccvs19",
+  "APX-67FC-VYS9": "PCw68q64",
+  "APX-QNRZ-8BKC": "GXrb7c72",
+  "APX-F52R-EQBJ": "XZb2f274",
+  "APX-S4CZ-T52Z": "KGb8tg76",
+  "APX-63QC-NTK8": "SNxbnm69",
+  "APX-WK2N-FH4V": "NV68s386",
+  "APX-52W6-9MD9": "ZUxvrq90",
+  "APX-9Q8U-97XN": "ZE57d933",
+  "APX-5B3E-QHV2": "TD2bzx34",
+  "APX-7BF6-4U58": "WQ4b9791",
+  "APX-ZUND-5CGU": "URjnne25",
+  "APX-29A8-CMXF": "NDgr3343",
+  "APX-8GXA-QBFP": "ETjxab42",
+  "APX-XREM-SXN2": "GMt97j56",
+  "APX-C3S7-Q7MJ": "QPuw7s85",
+  "APX-2LAN-Q2JC": "LBwu4d58",
+  "APX-YQND-SG58": "UZ6x9r13",
+  "APX-SZ37-69S5": "SKwusa11",
+  "APX-WAQU-BEQA": "QP7zyh81",
+  "APX-C3ZW-8DE6": "UTt2v738",
+  "APX-YVWN-Y5HE": "XC4am295",
+  "APX-3WY6-DSNN": "GUz4bz57",
+  "APX-97PU-4WYT": "GV8wav42",
+  "APX-9JHV-H994": "ZQ6jjf00",
+  "APX-DFAH-X5YK": "RKxxh718",
+  "APX-2W6Z-HJXZ": "CTjcur28",
+  "APX-6FZE-NGKM": "AV96fk63",
+  "APX-3JZC-7TRK": "DVju7x64",
+  "APX-3NWK-QUW4": "CFq3sa75",
+  "APX-YMD3-AJFX": "HG22h592",
+  "APX-FT48-D9ZR": "HSz9dc81",
+  "APX-AFUW-JDQD": "QU2hy614",
+  "APX-J3D6-VBTD": "MTegae80",
+  "APX-4QZ7-JGB7": "XUyqcx23",
+  "APX-DTDV-LSBX": "CP2v4n32",
+  "APX-7QW2-RMLC": "WZnebr20",
+  "APX-PFMZ-N5YN": "HK8jqv22",
+  "APX-Y9YC-CFCM": "EQdnah36",
+  "APX-9YM4-JLX5": "AQj2ed26",
+  "APX-55MT-6MHY": "SDt44h92",
+  "APX-QCPE-JWJQ": "KAcy5k74",
+  "APX-3D2T-NGUL": "LHvf3u15",
+  "APX-4WN5-H9V4": "BA2j8j91",
+  "APX-K7D2-SC5X": "ZRcf2q87",
+  "APX-FHYM-A6DA": "NMb3ua87",
+  "APX-66VS-S7TM": "NLsdak41",
+  "APX-6LL6-RQRY": "RF8xaw16",
+  "APX-T3QN-DKLD": "HKgxsy25",
+  "APX-ZZKS-D4KJ": "NW3xs481",
+  "APX-X2TH-G2NY": "NGwfhy04",
+  "APX-GJ9A-68GU": "MS56pm86",
+  "APX-SZN8-PNKN": "GGm5jk26",
+  "APX-3Y3H-GVK6": "RXkdmv95",
+  "APX-JNCJ-8P2S": "AFzh5778",
+  "APX-CYST-4PWE": "RCtukx58",
+  "APX-3H3P-ARSM": "EQfzkz00",
+  "APX-PDAH-AD64": "FAqe7c85",
+  "APX-5AQ9-DDQD": "SBy43h70",
+  "APX-6YEN-SPL3": "CSchfr60",
+  "APX-7EQH-BH4J": "SF4uq477",
+  "APX-X92M-V7V8": "DWu6yd61",
+  "APX-BGEX-C3TE": "XFdyfb06",
+  "APX-B62S-GMA6": "CB68bd49",
+  "APX-74AV-CXYG": "NBd28n78",
+  "APX-FSNG-JC4P": "SYkgjp65",
+  "APX-FPEN-CPN2": "VB9pkw77",
+  "APX-M6A2-FKCK": "NR938c36",
+  "APX-NP7M-X6QT": "CWb2je21",
+  "APX-7BHK-YRU9": "PCts9x41",
+  "APX-H4WE-5XL6": "ZEjnmc11",
+  "APX-S3AW-CF72": "YRftce41",
+  "APX-EDRX-A8W5": "MWyx5k51",
+  "APX-96DE-ZZHM": "VCh3jb53",
+  "APX-UADN-PZTR": "BSv3mn68",
+  "APX-YYY4-ZT7T": "SLcxt373",
+  "APX-7EV3-28F2": "ESe8mf51",
+  "APX-L8D4-M2UK": "YJ3jkp12",
+  "APX-SHGD-JVLK": "EEks5s38",
+  "APX-R6AY-BTYF": "TZcwem49",
+  "APX-28J7-X2QV": "BYkd9282",
+  "APX-LMU3-MQZG": "WE328621",
+  "APX-CQDG-4VM4": "ABneps11",
+  "APX-75F3-BYNW": "QMtaay49",
+  "APX-TA3X-RPWG": "WLp38w32",
+  "APX-FQC3-2VLR": "WRq2ca85",
+  "APX-ZXD7-H94W": "HVp9h710",
+  "APX-CMRB-VQS7": "ZX6syn17",
+  "APX-GCUL-SCP4": "RXefry20",
+  "APX-Q8UM-P4ZR": "HQcgun66",
+  "APX-54CH-KWWM": "VKxssx87",
+  "APX-S9HZ-U3YG": "VH6vyv93",
+  "APX-LUC7-S5F5": "WRfshu75",
+  "APX-YNA4-EAHE": "HBmguw24",
+  "APX-YFNM-EZY4": "HF8x7t73",
+  "APX-47SR-2LZH": "XEacrz11",
+  "APX-2CS7-U3GE": "TFnrpe50",
+  "APX-G3VS-DW7E": "EVae3p56",
+  "APX-RYKU-KTAF": "QUush788",
+  "APX-99Q4-VUEM": "HQn7kr73",
+  "APX-JNZS-SFXL": "REggwb36",
+  "APX-726W-TPFV": "TE3b9x81",
+  "APX-E2WH-UNRL": "YL9gvr44",
+  "APX-BYUZ-MW88": "WQ7sts80",
+  "APX-VNRX-43LK": "BG966g04",
+  "APX-D4SR-Q52X": "EBwved98",
+  "APX-7MRJ-CU8J": "ZTs88p21",
+  "APX-DUU2-LT87": "FGj3eg36",
+  "APX-7CXJ-GP9Q": "ZYkq4f05",
+  "APX-TQ4W-RXRS": "RW5ehq24",
+  "APX-6PQV-WVMQ": "CT93j560",
+  "APX-TZXB-BALX": "TE8zsv26",
+  "APX-Y9ZC-UXQQ": "ZG3zaa91",
+  "APX-KDQU-YU6W": "LMs4da64",
+  "APX-RGZ4-8PLD": "YP35ad04",
+  "APX-YPSZ-LP5P": "EF69sh89",
+  "APX-68LJ-64PD": "FQfd8h22",
+  "APX-JZW5-4XZ3": "LNhhwd11",
+  "APX-ZNCD-DCJS": "RSb7ch51",
+  "APX-DGE7-L3QR": "SPhkw409",
+  "APX-VWVY-8CQE": "EErjct02",
+  "APX-MNL6-WK73": "AGm48z52",
+  "APX-QDBP-YA4L": "XNb7vu11",
+  "APX-9UM5-L9PB": "EYauzk72",
+  "APX-ALJJ-WHY7": "QDfncj13",
+  "APX-WTEE-L47U": "WZ89nc23",
+  "APX-YKLD-R4EQ": "JZw7u346",
+  "APX-7PX9-NDSM": "BDyq2q39",
+  "APX-PTLF-NA87": "KZkd6708",
+  "APX-9SEX-FV5C": "WChbac27",
+  "APX-GQZB-2UNG": "KKdrdg42",
+  "APX-2UN8-R4HC": "LPh6ek76",
+  "APX-DZAY-38H9": "KBkuh409",
+  "APX-U5YT-K5LC": "ZTkbgp76",
+  "APX-BUWH-3RGG": "ZTdv2v28",
+  "APX-ZFKW-9NQT": "YLk73f88",
+  "APX-2RGK-CMS6": "ST36ys20",
+  "APX-3VFC-RR74": "NPs53v59",
+  "APX-E4SW-XWU3": "BB634326",
+  "APX-YMWP-CBAU": "QZ8e9585",
+  "APX-ELCA-M3B5": "TR5v8z36",
+  "APX-6N7K-XBGT": "QUhs4z70",
+  "APX-M8T3-24ED": "VXrk8r94",
+  "APX-YDEC-4SZM": "BP42ew11",
+  "APX-7U8C-C7MA": "XKmsbe79",
+  "APX-YRTN-Q67Q": "KLya4m35",
+  "APX-QS83-SMR8": "PZ73hn43",
+  "APX-ZE3Q-UTDH": "GF3nyg24",
+  "APX-DANK-FNQN": "SCvwq950",
+  "APX-AVXQ-U54P": "ZHma9z01",
+  "APX-BRHJ-GS9R": "KBcwx846",
+  "APX-5VV5-S276": "BNpzqb22",
+  "APX-LXK8-RAAZ": "HWexzr10",
+  "APX-9D4S-65RG": "HLu2tu10",
+  "APX-K8VG-N2LA": "EAcjva52",
+  "APX-B2Y7-KWET": "ZXfdjn13",
+  "APX-W9L6-UA3B": "WU343a84",
+  "APX-XDS3-TB3H": "HN6zfb35",
+  "APX-QTZ4-VX55": "MHtvpk91",
+  "APX-HRVR-MEZF": "HDzsug85",
+  "APX-VXKP-UY3M": "GF423a26",
+  "APX-TQWX-89S4": "ZGx22a03",
+  "APX-BXKG-RB7D": "ZVqn8448",
+  "APX-AHCZ-JTN2": "WGe3k200",
+  "APX-YJYZ-DC3L": "XGgzd892",
+  "APX-2RGA-2QL7": "WHyxkm93",
+  "APX-TAL5-XUPE": "AHyqhg65",
+  "APX-C46K-ZCFK": "CTc6p850",
+  "APX-CWSV-2BZN": "KGjger15",
+  "APX-4B66-2D87": "YWfpd256",
+  "APX-H67K-BCA2": "NHn4td47",
+  "APX-CW6B-3HG9": "CRstde48",
+  "APX-YTAG-GXAB": "NCpuwp44",
+  "APX-73E2-C3H3": "TSxj3h37",
+  "APX-YVLM-4Y72": "FT8ffk18",
+  "APX-3GVC-W2GX": "JNsmew40",
+  "APX-ZHP2-XCQD": "BLpfqj44",
+  "APX-QCSN-KG9G": "JP6ewf85",
+  "APX-E7A3-SSZZ": "VH6un887",
+  "APX-VAPG-BN9Q": "UWwdq330",
+  "APX-57HZ-6XFC": "XHjffb37",
+  "APX-9FKT-L6GZ": "TMdvdp21",
+  "APX-R9T7-KY4W": "FD7qjr23",
+  "APX-YG9G-WHJZ": "EKyp9745",
+  "APX-A2M9-X3SC": "HAauza52",
+  "APX-VNMA-EGZ2": "EWnt2v82",
+  "APX-FB4N-TXY5": "BVw5nb86",
+  "APX-2KR9-HSCR": "KMeaq344",
+  "APX-HEKX-35HJ": "PRfzeu17",
+  "APX-XUY6-WZ9Y": "DR88gs07",
+  "APX-X5CH-NKFD": "EYeteg72",
+  "APX-2SY5-GP65": "HBgysk42",
+  "APX-ZNWM-SCUG": "TWdkj472",
+  "APX-KKRZ-CEUV": "XE2swj56",
+  "APX-VSGZ-RMPM": "UGkxse49",
+  "APX-9TTN-D8QX": "QVe7n290",
+  "APX-FU7Q-GASG": "HFggge79",
+  "APX-37FY-CB2V": "LP8w7s77",
+  "APX-PBYE-KGH7": "DUn3td87",
+  "APX-WJNS-53ZT": "AMceav51",
+  "APX-S646-J4J3": "FW49zh29",
+  "APX-W9TV-S4AM": "WZ83ke07",
+  "APX-58CP-YRRY": "BTdk2542",
+  "APX-DLN8-8X3X": "KX7wt991",
+  "APX-EM75-EXBC": "HRdabf56",
+  "APX-DXHP-3KXM": "AQjkkj63",
+  "APX-RKXX-KJD6": "RVm5h814",
+  "APX-5WAR-JBZY": "YE9vz914",
+  "APX-T3QU-B7PC": "TEcszz16",
+  "APX-46PK-TUX4": "DD9cu846",
+  "APX-73C3-UDWM": "QNdukr06",
+  "APX-3PJU-7ZK8": "PHrwqh67",
+  "APX-BYPY-GZLM": "RMh9jt84",
+  "APX-9WQ2-VY4B": "QC5py651",
+  "APX-JJ4S-7GQV": "FXm59998",
+  "APX-M47W-WWG5": "NY4ueg55",
+  "APX-TPPK-CSJF": "KFhgt661",
+  "APX-LG3B-Q2QJ": "FQj56j07",
+  "APX-U8PT-WCBX": "QXg5p228",
+  "APX-7NNU-E7WC": "JMddtc17",
+  "APX-52WL-FBDG": "GKzer537",
+  "APX-3XVZ-NCFM": "GPwy2s47",
+  "APX-743B-YHF2": "KBfyru76",
+  "APX-YL4L-5RXF": "NQ4zns86",
+  "APX-NKLX-PL2F": "FHmd2a26",
+  "APX-4FDT-FNST": "KFa89977",
+  "APX-QEUR-S4U3": "VG9g7e73",
+  "APX-7ZWS-PTFW": "MRe3q819",
+  "APX-2TRN-M83U": "WGhf7q61",
+  "APX-YYPX-ZJ4C": "HUtavr18",
+  "APX-ULZX-73BU": "ZSenvh80",
+  "APX-DHTY-RU6A": "ZFpynd37",
+  "APX-XCUK-6EE2": "TM4tac65",
+  "APX-VVFM-UGNF": "NK2e6h26",
+  "APX-JLKF-F5SX": "HK5k6j85",
+  "APX-XADR-PPTZ": "XKgs9t44",
+  "APX-CEQD-N5V2": "BXf7bb30",
+  "APX-9JV5-YNPL": "CDwwx777",
+  "APX-9V46-X2YZ": "ATey8970",
+  "APX-C6LW-VWQ9": "SC9b5d24",
+  "APX-44VD-9YYW": "NA2w2539",
+  "APX-YS79-JL8T": "ZCkuvc57",
+  "APX-Z5EH-MZSE": "GGphrg71",
+  "APX-PUEN-LJ3X": "UNa7be78",
+  "APX-BZSJ-H6W6": "CVrtt640",
+  "APX-X9F3-S4LV": "FAd4tz64",
+  "APX-ZQ2E-PRAQ": "KTsbjh56",
+  "APX-X8RT-H8U5": "VBrjhm04",
+  "APX-CRYV-WKQL": "ECqak661",
+  "APX-4PEW-DHEX": "VFhxg449",
+  "APX-WBSK-R8L9": "FMayq370",
+  "APX-9WQQ-TTHR": "GCa2mu34",
+  "APX-P749-E3KH": "YPg5a507",
+  "APX-F4PH-X22P": "XF2e7r15",
+  "APX-J4AY-WZ62": "RQmkyu89",
+  "APX-SMC7-SYEF": "MM3v4e35",
+  "APX-ZZAP-BYHS": "NQhd3x55",
+  "APX-YS5Q-5TMU": "QBjfwu87",
+  "APX-M2HP-9PBJ": "KKef8697",
+  "APX-W6AM-538X": "KKzqtq34",
+  "APX-8QX6-JFXY": "MU9fuv52",
+  "APX-PHZH-AVME": "NLyxsd22",
+  "APX-69KV-HES9": "DHbz2g95",
+};
+
+// Check if already unlocked
+function initKeySystem() {
+  const savedId = localStorage.getItem('apx_access_key');
+  const savedPass = localStorage.getItem('apx_access_pass');
+  if(savedId && savedPass && VALID_KEYS[savedId] === savedPass) {
+    unlockApp();
+  } else {
+    showKeyScreen();
+  }
+}
+
+function showKeyScreen() {
+  const ks = document.getElementById('keyScreen');
+  if(ks) ks.style.display = 'flex';
+}
+
+function hideKeyScreen() {
+  const ks = document.getElementById('keyScreen');
+  if(ks) {
+    ks.style.animation = 'none';
+    ks.style.opacity = '0';
+    ks.style.transition = 'opacity .4s ease';
+    setTimeout(() => {
+      ks.style.display = 'none';
+      ks.style.opacity = '1';
+    }, 400);
+  }
+}
+
+function checkKey() {
+  const idInput = document.getElementById('keyInput');
+  const passInput = document.getElementById('passInput');
+  const errorEl = document.getElementById('keyError');
+  const btn = document.getElementById('keyBtn');
+
+  const enteredId = idInput.value.trim().toUpperCase();
+  const enteredPass = passInput.value.trim();
+
+  if(!enteredId) {
+    shakeInput();
+    errorEl.textContent = '⚠️ Please enter your Customer ID';
+    errorEl.style.display = 'block';
+    return;
+  }
+  if(!enteredPass) {
+    shakeInput();
+    errorEl.textContent = '⚠️ Please enter your Password';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  btn.textContent = '🔄 Checking...';
+  btn.disabled = true;
+
+  setTimeout(() => {
+    const correctPass = VALID_KEYS[enteredId];
+    if(correctPass && correctPass === enteredPass) {
+      // ✅ VALID ID + PASSWORD!
+      localStorage.setItem('apx_access_key', enteredId);
+      localStorage.setItem('apx_access_pass', enteredPass);
+      btn.textContent = '✅ Access Granted!';
+      btn.style.background = 'linear-gradient(135deg, #166534, #16a34a)';
+      errorEl.style.display = 'none';
+      setTimeout(() => { unlockApp(); }, 800);
+    } else {
+      // ❌ WRONG ID OR PASSWORD
+      btn.textContent = '🔓 Unlock Apexion Finance';
+      btn.disabled = false;
+      errorEl.textContent = '❌ Invalid ID or Password. Please check your purchase email.';
+      errorEl.style.display = 'block';
+      shakeInput();
+      passInput.value = '';
+      passInput.focus();
+    }
+  }, 600);
+}
+
+function shakeInput() {
+  const input = document.getElementById('keyInput');
+  input.style.animation = 'none';
+  input.style.borderColor = '#C96B6B';
+  input.style.background = 'rgba(201,107,107,.1)';
+  setTimeout(() => {
+    input.style.borderColor = '';
+    input.style.background = '';
+  }, 1000);
+}
+
+function unlockApp() {
+  hideKeyScreen();
+  toast('✅ Welcome to Apexion Finance!');
+  // Start Firebase sync after unlock
+  setTimeout(() => onAppUnlocked(), 300);
+}
+
+// Add logout/change key option to sidebar
+function addKeyLogout() {
+  const sbNav = document.querySelector('.sb-nav');
+  if(sbNav) {
+    const logoutDiv = document.createElement('div');
+    logoutDiv.style.cssText = 'padding:4px 16px 8px';
+    logoutDiv.innerHTML = \`
+      <button onclick="logoutKey()" style="display:flex;align-items:center;gap:10px;width:100%;padding:9px 18px;background:none;border:none;border-left:3px solid transparent;color:rgba(255,255,255,.35);font-size:.78rem;font-family:inherit;cursor:pointer;transition:.15s;text-align:left;border-radius:0 6px 6px 0" 
+        onmouseenter="this.style.color='#fca5a5';this.style.background='rgba(201,107,107,.08)'" 
+        onmouseleave="this.style.color='rgba(255,255,255,.35)';this.style.background='none'">
+        🔑 Change Access Key
+      </button>
+    \`;
+    sbNav.appendChild(logoutDiv);
+  }
+}
+
+function logoutKey() {
+  if(confirm('Sign out and return to key entry screen?')) {
+    localStorage.removeItem('apx_access_key'); localStorage.removeItem('apx_access_pass');
+    showKeyScreen();
+    document.getElementById('keyInput').value = '';
+    document.getElementById('keyError').style.display = 'none';
+    document.getElementById('keyBtn').textContent = '🔓 Unlock Apexion Finance';
+    document.getElementById('keyBtn').disabled = false;
+    document.getElementById('keyBtn').style.background = '';
+  }
+}
+
+
+// ══════════════════════════════════════════════════
+// FIREBASE CLOUD SYNC — Same data on all devices!
+// ══════════════════════════════════════════════════
+//
+// SETUP (one time, 10 minutes):
+// 1. Go to: console.firebase.google.com
+// 2. Create project "apexion-finance"
+// 3. Enable Firestore Database
+// 4. Go to Project Settings → Your apps → Web
+// 5. Copy your config and paste below
+// ══════════════════════════════════════════════════
+
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDCxttHEIynYdizZqggpai_GA0wk3FciZ4",
+  authDomain: "apexion-finance.firebaseapp.com",
+  projectId: "apexion-finance",
+  storageBucket: "apexion-finance.firebasestorage.app",
+  messagingSenderId: "254900081783",
+  appId: "1:254900081783:web:b34e145f80100f986ea272"
+};
+
+let db = null;
+let syncTimer = null;
+let isSyncing = false;
+let firebaseReady = false;
+
+// Initialize Firebase
+function initFirebase() {
+  try {
+    if(firebase.apps.length === 0) {
+      firebase.initializeApp(FIREBASE_CONFIG);
+    }
+    db = firebase.firestore();
+
+    // Enable offline support
+    db.enablePersistence({ synchronizeTabs: true })
+      .then(() => console.log('✅ Offline mode enabled'))
+      .catch(e => console.log('Offline:', e.code));
+
+    firebaseReady = true;
+    console.log('✅ Firebase ready');
+  } catch(e) {
+    console.log('Firebase not configured — using local only:', e.message);
+    firebaseReady = false;
+  }
+}
+
+// Show sync notification
+function showSyncMsg(msg, duration = 2500) {
+  const el = document.getElementById('syncIndicator');
+  const txt = document.getElementById('syncMsg');
+  if(!el || !txt) return;
+  txt.textContent = msg;
+  el.style.display = 'flex';
+  el.style.opacity = '1';
+  clearTimeout(window._syncHideTimer);
+  window._syncHideTimer = setTimeout(() => {
+    el.style.opacity = '0';
+    setTimeout(() => { el.style.display = 'none'; el.style.opacity = '1'; }, 300);
+  }, duration);
+}
+
+// Load data from cloud using access key as user ID
+async function loadFromCloud() {
+  if(!firebaseReady || !db) return;
+  const key = localStorage.getItem('apx_access_key');
+  if(!key) return;
+
+  try {
+    showSyncMsg('☁️ Loading your data...');
+    const doc = await db.collection('apexion_users').doc(key).get();
+    if(doc.exists) {
+      const cloud = doc.data();
+      // Merge cloud data into D
+      if(cloud.E && cloud.E.length > 0) D.E = cloud.E;
+      if(cloud.I && cloud.I.length > 0) D.I = cloud.I;
+      if(cloud.G && cloud.G.length > 0) D.G = cloud.G;
+      if(cloud.DB && cloud.DB.length > 0) D.DB = cloud.DB;
+      if(cloud.BL && cloud.BL.length > 0) D.BL = cloud.BL;
+      if(cloud.SB && cloud.SB.length > 0) D.SB = cloud.SB;
+      if(cloud.SA && cloud.SA.length > 0) D.SA = cloud.SA;
+      if(cloud.INV && cloud.INV.length > 0) D.INV = cloud.INV;
+      if(cloud.cur) D.cur = cloud.cur;
+      if(cloud.yr) D.yr = cloud.yr;
+      if(cloud.mo) D.mo = cloud.mo;
+
+      // Save to local storage
+      try { localStorage.setItem('apx_v6', JSON.stringify(D)); } catch(e) {}
+
+      // Refresh UI
+      if(typeof initSels === 'function') initSels();
+      if(typeof updLbls === 'function') updLbls();
+      if(typeof rDash === 'function') rDash();
+
+      showSyncMsg('✅ Data synced across devices!');
+    } else {
+      // First time on this device with this key — save local data to cloud
+      await saveToCloud(true);
+      showSyncMsg('✅ Account ready on this device!');
+    }
+  } catch(e) {
+    console.log('Load error:', e);
+    showSyncMsg('📱 Working offline', 2000);
+  }
+}
+
+// Save data to cloud
+async function saveToCloud(silent = false) {
+  if(!firebaseReady || !db) return;
+  const key = localStorage.getItem('apx_access_key');
+  if(!key) return;
+
+  try {
+    if(!silent) showSyncMsg('☁️ Saving...', 5000);
+    await db.collection('apexion_users').doc(key).set({
+      E: D.E || [],
+      I: D.I || [],
+      G: D.G || [],
+      DB: D.DB || [],
+      BL: D.BL || [],
+      SB: D.SB || [],
+      SA: D.SA || [],
+      INV: D.INV || [],
+      cur: D.cur || 'USD',
+      yr: D.yr || new Date().getFullYear(),
+      mo: D.mo || 'January',
+      updatedAt: new Date().toISOString(),
+      deviceCount: firebase.firestore.FieldValue.increment ? 
+        firebase.firestore.FieldValue.increment(0) : 1
+    }, { merge: true });
+    if(!silent) showSyncMsg('✅ Saved to cloud!');
+  } catch(e) {
+    console.log('Save error:', e);
+    if(!silent) showSyncMsg('💾 Saved locally', 2000);
+  }
+}
+
+// Override sv() to also sync to cloud
+const _originalSv = typeof sv === 'function' ? sv : null;
+function sv() {
+  // Always save to localStorage first
+  try { localStorage.setItem('apx_v6', JSON.stringify(D)); } catch(e) {}
+  // Debounce cloud save (wait 2 seconds after last change)
+  if(firebaseReady) {
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(() => saveToCloud(), 2000);
+  }
+}
+
+// Call after unlocking app
+function onAppUnlocked() {
+  initFirebase();
+  setTimeout(() => loadFromCloud(), 500);
+}
+
 // ══ INIT ══
 window.addEventListener('load',()=>{
   loadTheme();
-  ld();initSels();updLbls();loadMode();
+  initKeySystem(); addKeyLogout(); ld();initSels();updLbls();loadMode();
   const t=today();['ed','id2','sav-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=t;});
   rDash();
   loadWAPhone();
