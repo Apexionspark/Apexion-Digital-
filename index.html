@@ -1264,9 +1264,10 @@ body.dark-mode .cal-legend span { color: #cccccc !important; }
       type="text" 
       id="keyInput" 
       placeholder="e.g. APX-XXXX-XXXX"
-      maxlength="15"
+      maxlength="16"
       autocomplete="off"
       spellcheck="false"
+      autocapitalize="characters"
       onkeydown="if(event.key==='Enter') document.getElementById('passInput').focus()"
     >
     <label class="key-label" style="margin-top:4px">🔑 Password</label>
@@ -1275,7 +1276,7 @@ body.dark-mode .cal-legend span { color: #cccccc !important; }
       type="password" 
       id="passInput" 
       placeholder="Enter your password"
-      maxlength="12"
+      maxlength="20"
       autocomplete="off"
       onkeydown="if(event.key==='Enter') checkKey()"
     >
@@ -3732,9 +3733,11 @@ function checkKey() {
   const errorEl = document.getElementById('keyError');
   const btn = document.getElementById('keyBtn');
 
-  const enteredId = idInput.value.trim().toUpperCase();
+  // Get values - trim whitespace, uppercase the ID
+  const enteredId = idInput.value.trim().toUpperCase().replace(/\s/g,'');
   const enteredPass = passInput.value.trim();
 
+  // Validate not empty
   if(!enteredId) {
     shakeInput();
     errorEl.textContent = '⚠️ Please enter your Customer ID';
@@ -3750,30 +3753,41 @@ function checkKey() {
 
   btn.textContent = '🔄 Checking...';
   btn.disabled = true;
+  errorEl.style.display = 'none';
 
   setTimeout(() => {
-    // Check custom password first, then default
+    // Check for custom password (if customer changed it)
     const customPass = localStorage.getItem('apx_custom_pass_' + enteredId);
-    const correctPass = customPass || VALID_KEYS[enteredId];
+    // Get default password from VALID_KEYS
+    const defaultPass = VALID_KEYS[enteredId];
+    // Use custom password if set, otherwise use default
+    const correctPass = customPass || defaultPass;
+
     if(correctPass && correctPass === enteredPass) {
-      // ✅ VALID ID + PASSWORD!
+      // ✅ LOGIN SUCCESS!
       localStorage.setItem('apx_access_key', enteredId);
       localStorage.setItem('apx_access_pass', enteredPass);
       btn.textContent = '✅ Access Granted!';
       btn.style.background = 'linear-gradient(135deg, #166534, #16a34a)';
       errorEl.style.display = 'none';
-      setTimeout(() => { unlockApp(); }, 800);
+      setTimeout(() => { unlockApp(); }, 700);
     } else {
-      // ❌ WRONG ID OR PASSWORD
+      // ❌ WRONG CREDENTIALS
       btn.textContent = '🔓 Unlock Apexion Finance';
+      btn.style.background = '';
       btn.disabled = false;
-      errorEl.textContent = '❌ Invalid ID or Password. Please check your purchase email.';
+      // Show helpful error
+      if(!defaultPass) {
+        errorEl.textContent = '❌ Customer ID not found. Please check your ID carefully.';
+      } else {
+        errorEl.textContent = '❌ Wrong password. Please check your password carefully.';
+      }
       errorEl.style.display = 'block';
       shakeInput();
       passInput.value = '';
       passInput.focus();
     }
-  }, 600);
+  }, 500);
 }
 
 function shakeInput() {
