@@ -1082,6 +1082,119 @@ body.dark-mode .cal-legend span { color: #cccccc !important; }
 }
 @keyframes syncPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
 
+
+/* CHANGE PASSWORD MODAL */
+.cp-modal-wrap {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.6);
+  z-index: 99998;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+.cp-modal-wrap.show { display: flex; }
+.cp-modal {
+  background: #1A1D27;
+  border-radius: 18px;
+  padding: 30px 28px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 25px 60px rgba(0,0,0,.5);
+  border: 1px solid rgba(107,143,113,.2);
+  animation: keyIn .3s ease;
+}
+.cp-title {
+  font-family: Georgia, serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cp-sub {
+  font-size: .78rem;
+  color: rgba(255,255,255,.4);
+  margin-bottom: 22px;
+  line-height: 1.5;
+}
+.cp-label {
+  font-size: .68rem;
+  font-weight: 700;
+  color: rgba(134,239,172,.6);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  display: block;
+  margin-bottom: 6px;
+}
+.cp-input {
+  width: 100%;
+  background: rgba(255,255,255,.07);
+  border: 1.5px solid rgba(255,255,255,.1);
+  border-radius: 10px;
+  padding: 13px 14px;
+  font-size: .95rem;
+  color: #fff;
+  font-family: inherit;
+  outline: none;
+  margin-bottom: 14px;
+  transition: .2s;
+  min-height: 48px;
+}
+.cp-input:focus {
+  border-color: #6B8F71;
+  background: rgba(107,143,113,.1);
+}
+.cp-input::placeholder { color: rgba(255,255,255,.2); }
+.cp-btn {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: 10px;
+  font-size: .9rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: .2s;
+  min-height: 48px;
+  margin-bottom: 10px;
+}
+.cp-btn-save {
+  background: linear-gradient(135deg, #3D5C40, #6B8F71);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(61,92,64,.4);
+}
+.cp-btn-save:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(61,92,64,.5); }
+.cp-btn-cancel {
+  background: rgba(255,255,255,.07);
+  color: rgba(255,255,255,.5);
+  border: 1px solid rgba(255,255,255,.1);
+}
+.cp-btn-cancel:hover { background: rgba(255,255,255,.12); color: #fff; }
+.cp-error {
+  background: rgba(201,107,107,.15);
+  border: 1px solid rgba(201,107,107,.3);
+  color: #fca5a5;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: .8rem;
+  margin-bottom: 12px;
+  display: none;
+}
+.cp-success {
+  background: rgba(107,143,113,.15);
+  border: 1px solid rgba(107,143,113,.3);
+  color: #86efac;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: .8rem;
+  margin-bottom: 12px;
+  display: none;
+}
+
 </style>
 
 
@@ -2735,7 +2848,31 @@ function downloadRpt(){
   </div>`;
 
   const win=window.open('','_blank','width=820,height=650');
-  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Apexion Finance Report — '+label+'</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;background:#fff;padding:20px}@media print{.no-print{display:none!important}@page{margin:12mm;size:A4}}</style></head><body><div class="no-print" style="text-align:center;padding:14px;background:#2E5C3F;margin-bottom:18px;border-radius:8px"><button onclick="window.print()" style="background:#fff;color:#2E5C3F;border:none;padding:12px 28px;border-radius:6px;font-size:1rem;font-weight:700;cursor:pointer;margin-right:10px">🖨️ Print / Save as PDF</button><button onclick="window.close()" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4);padding:12px 20px;border-radius:6px;font-size:.9rem;cursor:pointer">✕ Close</button></div>'+reportHTML+'<scr'+'ipt>setTimeout(()=>window.print(),800);</scr'+'ipt></body></html>');
+  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Apexion Finance Report — '+label+'</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;background:#fff;padding:20px}@media print{.no-print{display:none!important}@page{margin:12mm;size:A4}}</style></head><body><div class="no-print" style="text-align:center;padding:14px;background:#2E5C3F;margin-bottom:18px;border-radius:8px"><button onclick="window.print()" style="background:#fff;color:#2E5C3F;border:none;padding:12px 28px;border-radius:6px;font-size:1rem;font-weight:700;cursor:pointer;margin-right:10px">🖨️ Print / Save as PDF</button><button onclick="window.close()" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4);padding:12px 20px;border-radius:6px;font-size:.9rem;cursor:pointer">✕ Close</button></div>'+reportHTML+'<scr'+'ipt>setTimeout(()=>window.print(),800);</scr'+'ipt>
+<!-- CHANGE PASSWORD MODAL -->
+<div class="cp-modal-wrap" id="cpModal">
+  <div class="cp-modal">
+    <div class="cp-title">🔑 Change Password</div>
+    <div class="cp-sub">Create a new password for your account.<br>Your Customer ID will stay the same.</div>
+
+    <div class="cp-error" id="cpError"></div>
+    <div class="cp-success" id="cpSuccess"></div>
+
+    <label class="cp-label">Current Password</label>
+    <input class="cp-input" type="password" id="cpCurrent" placeholder="Enter current password">
+
+    <label class="cp-label">New Password</label>
+    <input class="cp-input" type="password" id="cpNew" placeholder="Enter new password (min 6 chars)">
+
+    <label class="cp-label">Confirm New Password</label>
+    <input class="cp-input" type="password" id="cpConfirm" placeholder="Repeat new password" onkeydown="if(event.key==='Enter')saveNewPass()">
+
+    <button class="cp-btn cp-btn-save" onclick="saveNewPass()">✅ Save New Password</button>
+    <button class="cp-btn cp-btn-cancel" onclick="closeCPModal()">Cancel</button>
+  </div>
+</div>
+
+</body></html>');
   win.document.close();
   toast('✅ Report opened — click "Save as PDF" in the print dialog!');
 }
@@ -3634,7 +3771,9 @@ function checkKey() {
   btn.disabled = true;
 
   setTimeout(() => {
-    const correctPass = VALID_KEYS[enteredId];
+    // Check custom password first, then default
+    const customPass = localStorage.getItem('apx_custom_pass_' + enteredId);
+    const correctPass = customPass || VALID_KEYS[enteredId];
     if(correctPass && correctPass === enteredPass) {
       // ✅ VALID ID + PASSWORD!
       localStorage.setItem('apx_access_key', enteredId);
@@ -3857,6 +3996,124 @@ function sv() {
 function onAppUnlocked() {
   initFirebase();
   setTimeout(() => loadFromCloud(), 500);
+}
+
+
+// ══ CHANGE PASSWORD ══
+function openCPModal() {
+  document.getElementById('cpModal').classList.add('show');
+  document.getElementById('cpCurrent').value = '';
+  document.getElementById('cpNew').value = '';
+  document.getElementById('cpConfirm').value = '';
+  document.getElementById('cpError').style.display = 'none';
+  document.getElementById('cpSuccess').style.display = 'none';
+  setTimeout(() => document.getElementById('cpCurrent').focus(), 200);
+}
+
+function closeCPModal() {
+  document.getElementById('cpModal').classList.remove('show');
+}
+
+// Close on backdrop click
+document.addEventListener('DOMContentLoaded', () => {
+  const modal = document.getElementById('cpModal');
+  if(modal) {
+    modal.addEventListener('click', (e) => {
+      if(e.target === modal) closeCPModal();
+    });
+  }
+});
+
+function saveNewPass() {
+  const currentPass = document.getElementById('cpCurrent').value.trim();
+  const newPass = document.getElementById('cpNew').value.trim();
+  const confirmPass = document.getElementById('cpConfirm').value.trim();
+  const errEl = document.getElementById('cpError');
+  const sucEl = document.getElementById('cpSuccess');
+
+  errEl.style.display = 'none';
+  sucEl.style.display = 'none';
+
+  // Get current ID
+  const savedId = localStorage.getItem('apx_access_key');
+  if(!savedId) {
+    errEl.textContent = '❌ Session expired. Please login again.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  // Verify current password
+  const correctPass = VALID_KEYS[savedId];
+  if(!correctPass || correctPass !== currentPass) {
+    errEl.textContent = '❌ Current password is incorrect.';
+    errEl.style.display = 'block';
+    document.getElementById('cpCurrent').value = '';
+    document.getElementById('cpCurrent').focus();
+    return;
+  }
+
+  // Validate new password
+  if(newPass.length < 6) {
+    errEl.textContent = '❌ New password must be at least 6 characters.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  if(newPass !== confirmPass) {
+    errEl.textContent = '❌ New passwords do not match.';
+    errEl.style.display = 'block';
+    document.getElementById('cpConfirm').value = '';
+    document.getElementById('cpConfirm').focus();
+    return;
+  }
+
+  if(newPass === currentPass) {
+    errEl.textContent = '❌ New password must be different from current password.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  // Save new password to localStorage
+  localStorage.setItem('apx_access_pass', newPass);
+  localStorage.setItem('apx_custom_pass_' + savedId, newPass);
+
+  // Also save to Firebase if available
+  if(typeof saveToCloud === 'function') {
+    const key = savedId;
+    if(firebaseReady && db) {
+      db.collection('apexion_users').doc(key).set({
+        customPassword: newPass,
+        passwordChangedAt: new Date().toISOString()
+      }, { merge: true }).then(() => {
+        console.log('Password synced to cloud');
+      }).catch(e => console.log('Password sync error:', e));
+    }
+  }
+
+  // Update VALID_KEYS in memory (for this session)
+  VALID_KEYS[savedId] = newPass;
+
+  // Show success
+  sucEl.textContent = '✅ Password changed successfully! Your new password is saved.';
+  sucEl.style.display = 'block';
+
+  // Clear fields
+  document.getElementById('cpCurrent').value = '';
+  document.getElementById('cpNew').value = '';
+  document.getElementById('cpConfirm').value = '';
+
+  // Show toast
+  toast('✅ Password changed successfully! 🔑');
+
+  // Close after 2 seconds
+  setTimeout(() => closeCPModal(), 2500);
+}
+
+// Check for custom password on login (user may have changed it)
+function getEffectivePassword(id) {
+  // Check if user has set a custom password
+  const customPass = localStorage.getItem('apx_custom_pass_' + id);
+  return customPass || VALID_KEYS[id];
 }
 
 // ══ INIT ══
