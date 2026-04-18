@@ -2159,6 +2159,8 @@ window.addEventListener('DOMContentLoaded', function() {
       if (ok) {
         document.getElementById('apxLogin').style.display = 'none';
         document.body.classList.remove('locked');
+        // Show localStorage data instantly while cloud loads
+        _initApp();
         _loadCloud();
       } else {
         _fbSignOut(true);
@@ -2190,16 +2192,16 @@ function _loadCloud() {
       if (d.yr)  D.yr  = d.yr;
       if (d.mo)  D.mo  = d.mo;
       try { localStorage.setItem('apx_v6', JSON.stringify(D)); } catch(e){}
-      _initApp();
       initSels();
-      rfr();
+      updLbls();
+      rDash();
       _showSync('✓ Cloud data loaded!');
     } else {
       // No cloud data - D already has localStorage data from ld() on page load
       // Push localStorage data up to cloud so other devices get it
-      _initApp();
       initSels();
-      rfr();
+      updLbls();
+      rDash();
       if (D.E.length || D.I.length || D.G.length || D.BL.length || D.DB.length) {
         _showSync('Backing up local data to cloud...', 5000);
         _saveCloud();
@@ -2376,6 +2378,9 @@ function lSignIn() {
     setTimeout(function(){
       document.getElementById('apxLogin').style.display = 'none';
       document.body.classList.remove('locked');
+      // Show localStorage data immediately - no blank screen
+      _initApp();
+      // Then load cloud data on top
       _loadCloud();
     }, 800);
   }).catch(function() {
@@ -2441,6 +2446,21 @@ window.addEventListener('load', function() {
   ld();
   initSels();
   updLbls();
+  // If session exists, render dashboard immediately with localStorage data
+  // Cloud data will re-render on top when it arrives
+  if (_uid && _idToken) {
+    var dashPage = document.getElementById('pg-dashboard');
+    var dashBtn  = document.querySelector('.ni[data-p="dashboard"]');
+    if (dashPage) { 
+      document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('on'); });
+      dashPage.classList.add('on'); 
+    }
+    if (dashBtn) {
+      document.querySelectorAll('.ni').forEach(function(b){ b.classList.remove('on'); });
+      dashBtn.classList.add('on');
+    }
+    rDash();
+  }
   // Focus email field
   var emailEl = document.getElementById('lEmail');
   if (emailEl) emailEl.focus();
