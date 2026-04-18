@@ -1169,10 +1169,10 @@ function ld(){
   }
 }
 function sv(){
-  try {
-    localStorage.setItem('apx_v6', JSON.stringify(D));
-  } catch(e) {
-    console.log('Storage error:', e);
+  try { localStorage.setItem('apx_v6', JSON.stringify(D)); } catch(e) {}
+  if (_uid && _idToken) {
+    clearTimeout(_stmr);
+    _stmr = setTimeout(_saveCloud, 2000);
   }
 }
 
@@ -2061,10 +2061,11 @@ function _fsGet(path, cb) {
   }).then(function(r){
     if (r.status === 401) {
       _fbRefresh(function(ok){ if(ok) _fsGet(path,cb); else cb(null); });
-      return;
+      return null;
     }
+    if (!r.ok) { cb(null); return null; }
     return r.json();
-  }).then(function(d){ if(d) cb(d); }).catch(function(){ cb(null); });
+  }).then(function(d){ if(d !== null && d !== undefined) cb(d); }).catch(function(){ cb(null); });
 }
 
 function _fsSet(path, data, cb) {
@@ -2095,7 +2096,7 @@ function _fsSet(path, data, cb) {
   }).catch(function(){ if(cb) cb(false); });
 }
 
-function _fsPatch(path, data) {
+function _fsPatch(path, data, cb) {
   // PATCH without preconditions - just upsert
   function toFsVal(v) {
     if (v === null || v === undefined) return {nullValue:null};
@@ -2117,8 +2118,14 @@ function _fsPatch(path, data) {
     headers:{'Authorization':'Bearer '+_idToken,'Content-Type':'application/json'},
     body:JSON.stringify({fields:fields})
   }).then(function(r){
-    if (r.status===401) { _fbRefresh(function(ok){ if(ok) _fsPatch(path,data); }); }
-  }).catch(function(){});
+    if (r.status===401) { _fbRefresh(function(ok){ if(ok) _fsPatch(path,data,cb); }); return; }
+    if (!r.ok) {
+      r.json().then(function(e){ console.error('Firestore save error:', e.error && e.error.message); }).catch(function(){});
+      if (cb) cb(false);
+    } else {
+      if (cb) cb(true);
+    }
+  }).catch(function(e){ console.error('Firestore network error:', e); if(cb) cb(false); });
 }
 
 // ── PARSE FIRESTORE DOCUMENT TO PLAIN JS ──
@@ -2192,13 +2199,17 @@ function _loadCloud() {
 // ── SAVE DATA TO CLOUD ──
 function _saveCloud() {
   if (!_uid || !_idToken) return;
-  _fsPatch('users/' + _uid, {
+  _showSync('Saving...', 4000);
+  var data = {
     E:D.E||[], I:D.I||[], G:D.G||[], DB:D.DB||[],
     BL:D.BL||[], SB:D.SB||[], SA:D.SA||[], INV:D.INV||[],
     cur:D.cur||'USD',
     yr:D.yr||new Date().getFullYear(),
     mo:D.mo||'January',
     upd:new Date().toISOString()
+  };
+  _fsPatch('users/' + _uid, data, function(ok) {
+    _showSync(ok !== false ? '✓ Saved to cloud' : '⚠ Save failed - check connection', 2500);
   });
 }
 
@@ -2396,57 +2407,3 @@ window.addEventListener('load', function() {
 </script>
 </body>
 </html>
-// ── SYNC BADGE ──
-function _showSync(msg, dur) {
-  var el = document.getElementById('syncBadge');
-  if (!el) return;
-  var txt = el.querySelector('span:last-child') || el;
-  if (el.querySelector('.syncDot')) txt = el.children[el.children.length-1];
-  el.style.display = 'flex';
-  try { txt.textContent = msg; } catch(e){}
-  clearTimeout(el._t);
-  el._t = setTimeout(function(){ el.style.display='none'; }, dur||2500);
-}
-
-// ── CHANGE PASSWORD (from cpWrap panel) ──
-function doChangePass() {
-  var cur = (document.getElementById('cpCur')||{}).value||'';
-  var np  = (document.getElementById('cpNew')||{}).value||'';
-  var con = (document.getElementById('cpCon')||{}).value||'';
-  if (!cur) { alert('Enter your current password'); return; }
-  if (np.length < 6) { alert('New password must be 6+ characters'); return; }
-  if (np !== con) { alert('Passwords do not match'); return; }
-  if (!_idToken) { alert('Not signed in'); return; }
-  // Re-authenticate first, then change password
-  var em = '';
-  fetch(FB_AUTH_URL + ":lookup?key=" + FB_API_KEY, {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({idToken:_idToken})
-  }).then(function(r){ return r.json(); }).then(function(d){
-    if (!d.users || !d.users[0]) { alert('Session expired. Please sign in again.'); return; }
-    em = d.users[0].email;
-    // Re-sign-in to verify current password
-    return fetch(FB_AUTH_URL + ":signInWithPassword?key=" + FB_API_KEY, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({email:em, password:cur, returnSecureToken:true})
-    });
-  }).then(function(r){ return r && r.json(); }).then(function(d){
-    if (!d || d.error) { alert('Current password is incorrect'); return; }
-    _idToken = d.idToken; _refreshToken = d.refreshToken;
-    // Now update to new password
-    return fetch(FB_AUTH_URL + ":update?key=" + FB_API_KEY, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({idToken:_idToken, password:np, returnSecureToken:true})
-    });
-  }).then(function(r){ return r && r.json(); }).then(function(d){
-    if (!d) return;
-    if (d.error) { alert('Error: ' + d.error.message); return; }
-    _idToken = d.idToken; _refreshToken = d.refreshToken;
-    try { localStorage.setItem('_fbSession', JSON.stringify({idToken:_idToken,refreshToken:_refreshToken,uid:_uid})); } catch(e){}
-    alert('Password changed successfully!');
-    document.getElementById('cpWrap').classList.remove('show');
-    ['cpCur','cpNew','cpCon'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
-  }).catch(function(){ alert('Network error. Try again.'); });
-}
-
-
