@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#1E2124">
-<link rel="manifest" href="manifest.json">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -435,9 +434,7 @@ body.locked { overflow:hidden; }
 @keyframes sPulse { 0%,100%{opacity:1}50%{opacity:.3} }
 
 </style>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<!-- Firebase: using REST API, no SDK needed -->
 </head>
 <body class="locked">
 
@@ -2019,58 +2016,162 @@ if (!navigator.onLine) { document.getElementById('offlineBadge').style.display='
 
 
 // ═══════════════════════════════════════════════
-// FIREBASE - Authentication + Cloud Sync
+// FIREBASE - REST API (no SDK required)
 // ═══════════════════════════════════════════════
-var _fbApp = firebase.initializeApp({
-  apiKey: "AIzaSyDCxttHEIynYdizZqggpai_GA0wk3FciZ4",
-  authDomain: "apexion-finance.firebaseapp.com",
-  databaseURL: "https://apexion-finance-default-rtdb.firebaseio.com",
-  projectId: "apexion-finance",
-  storageBucket: "apexion-finance.firebasestorage.app",
-  messagingSenderId: "254900081783",
-  appId: "1:254900081783:web:b34e145f80100f986ea272"
-});
-var _auth = firebase.auth();
-var _db   = firebase.firestore();
-var _uid  = null;
-var _stmr = null;
+var FB_API_KEY   = "AIzaSyDCxttHEIynYdizZqggpai_GA0wk3FciZ4";
+var FB_PROJECT   = "apexion-finance";
+var FB_AUTH_URL  = "https://identitytoolkit.googleapis.com/v1/accounts";
+var FB_FS_URL    = "https://firestore.googleapis.com/v1/projects/" + FB_PROJECT + "/databases/(default)/documents";
 
-// Enable offline persistence
-_db.enablePersistence({synchronizeTabs:true}).catch(function(){});
+// Auth state
+var _idToken     = null;
+var _refreshToken= null;
+var _uid         = null;
+var _stmr        = null;
+var _auth        = true; // truthy so guards pass; real auth via REST below
+var _db          = true;
+
+// Persist session across page reloads
+(function(){
+  try {
+    var s = JSON.parse(localStorage.getItem('_fbSession')||'{}');
+    if (s.idToken && s.uid) {
+      _idToken = s.idToken; _refreshToken = s.refreshToken; _uid = s.uid;
+    }
+  } catch(e){}
+})();
+
+// ── TOKEN REFRESH ──
+function _fbRefresh(cb) {
+  if (!_refreshToken) { cb(false); return; }
+  fetch("https://securetoken.googleapis.com/v1/token?key=" + FB_API_KEY, {
+    method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:'grant_type=refresh_token&refresh_token=' + encodeURIComponent(_refreshToken)
+  }).then(function(r){ return r.json(); }).then(function(d){
+    if (d.id_token) {
+      _idToken = d.id_token; _refreshToken = d.refresh_token;
+      try { localStorage.setItem('_fbSession', JSON.stringify({idToken:_idToken,refreshToken:_refreshToken,uid:_uid})); } catch(e){}
+      cb(true);
+    } else { cb(false); }
+  }).catch(function(){ cb(false); });
+}
+
+// ── FIRESTORE HELPERS ──
+function _fsGet(path, cb) {
+  fetch(FB_FS_URL + '/' + path, {
+    headers:{'Authorization':'Bearer ' + _idToken}
+  }).then(function(r){
+    if (r.status === 401) {
+      _fbRefresh(function(ok){ if(ok) _fsGet(path,cb); else cb(null); });
+      return;
+    }
+    return r.json();
+  }).then(function(d){ if(d) cb(d); }).catch(function(){ cb(null); });
+}
+
+function _fsSet(path, data, cb) {
+  // Convert JS object to Firestore document fields
+  function toFsVal(v) {
+    if (v === null || v === undefined) return {nullValue:null};
+    if (typeof v === 'boolean') return {booleanValue:v};
+    if (typeof v === 'number')  return {doubleValue:v};
+    if (typeof v === 'string')  return {stringValue:v};
+    if (Array.isArray(v))       return {arrayValue:{values:v.map(toFsVal)}};
+    if (typeof v === 'object')  {
+      var fields={};
+      Object.keys(v).forEach(function(k){ fields[k]=toFsVal(v[k]); });
+      return {mapValue:{fields:fields}};
+    }
+    return {stringValue:String(v)};
+  }
+  var fields={};
+  Object.keys(data).forEach(function(k){ fields[k]=toFsVal(data[k]); });
+
+  fetch(FB_FS_URL + '/' + path + '?currentDocument.exists=false&currentDocument.exists=true', {
+    method:'PATCH',
+    headers:{'Authorization':'Bearer '+_idToken,'Content-Type':'application/json'},
+    body:JSON.stringify({fields:fields})
+  }).then(function(r){
+    if (r.status===401) { _fbRefresh(function(ok){ if(ok) _fsSet(path,data,cb); }); return; }
+    if (cb) cb(r.ok);
+  }).catch(function(){ if(cb) cb(false); });
+}
+
+function _fsPatch(path, data) {
+  // PATCH without preconditions - just upsert
+  function toFsVal(v) {
+    if (v === null || v === undefined) return {nullValue:null};
+    if (typeof v === 'boolean') return {booleanValue:v};
+    if (typeof v === 'number')  return {doubleValue:v};
+    if (typeof v === 'string')  return {stringValue:v};
+    if (Array.isArray(v))       return {arrayValue:{values:v.map(toFsVal)}};
+    if (typeof v === 'object')  {
+      var fields={};
+      Object.keys(v).forEach(function(k){ fields[k]=toFsVal(v[k]); });
+      return {mapValue:{fields:fields}};
+    }
+    return {stringValue:String(v)};
+  }
+  var fields={};
+  Object.keys(data).forEach(function(k){ fields[k]=toFsVal(data[k]); });
+  fetch(FB_FS_URL + '/' + path, {
+    method:'PATCH',
+    headers:{'Authorization':'Bearer '+_idToken,'Content-Type':'application/json'},
+    body:JSON.stringify({fields:fields})
+  }).then(function(r){
+    if (r.status===401) { _fbRefresh(function(ok){ if(ok) _fsPatch(path,data); }); }
+  }).catch(function(){});
+}
+
+// ── PARSE FIRESTORE DOCUMENT TO PLAIN JS ──
+function _fsToJs(doc) {
+  function fromFsVal(v) {
+    if (!v) return null;
+    if ('nullValue'    in v) return null;
+    if ('booleanValue' in v) return v.booleanValue;
+    if ('integerValue' in v) return Number(v.integerValue);
+    if ('doubleValue'  in v) return v.doubleValue;
+    if ('stringValue'  in v) return v.stringValue;
+    if ('arrayValue'   in v) return (v.arrayValue.values||[]).map(fromFsVal);
+    if ('mapValue'     in v) {
+      var o={};
+      Object.keys(v.mapValue.fields||{}).forEach(function(k){ o[k]=fromFsVal(v.mapValue.fields[k]); });
+      return o;
+    }
+    return null;
+  }
+  var out={};
+  Object.keys(doc.fields||{}).forEach(function(k){ out[k]=fromFsVal(doc.fields[k]); });
+  return out;
+}
 
 // ── AUTH STATE LISTENER ──
-_auth.onAuthStateChanged(function(user) {
-  if (user) {
-    _uid = user.uid;
-    document.getElementById('apxLogin').style.display = 'none';
-    document.body.classList.remove('locked');
-    _loadCloud();
+// On page load: if we have a cached session, verify it then load data
+window.addEventListener('DOMContentLoaded', function() {
+  if (_uid && _idToken) {
+    // Verify token is still valid by refreshing
+    _fbRefresh(function(ok) {
+      if (ok) {
+        document.getElementById('apxLogin').style.display = 'none';
+        document.body.classList.remove('locked');
+        _loadCloud();
+      } else {
+        _fbSignOut(true);
+      }
+    });
   } else {
-    _uid = null;
     document.getElementById('apxLogin').style.display = 'flex';
     document.body.classList.add('locked');
   }
 });
 
-// ── SYNC BADGE ──
-function _showSync(msg, ms) {
-  var b = document.getElementById('syncBadge');
-  var t = document.getElementById('syncMsg');
-  if (!b || !t) return;
-  t.textContent = msg;
-  b.style.display = 'flex';
-  clearTimeout(window._syt);
-  window._syt = setTimeout(function(){ b.style.display='none'; }, ms||2500);
-}
-
 // ── LOAD DATA FROM CLOUD ──
 function _loadCloud() {
-  if (!_uid) return;
+  if (!_uid || !_idToken) { _initApp(); return; }
   _showSync('Loading your data...', 8000);
-  _db.collection('users').doc(_uid).get()
-  .then(function(doc) {
-    if (doc.exists) {
-      var d = doc.data();
+  _fsGet('users/' + _uid, function(doc) {
+    if (doc && doc.fields) {
+      var d = _fsToJs(doc);
       if (d.E  && d.E.length)   D.E  = d.E;
       if (d.I  && d.I.length)   D.I  = d.I;
       if (d.G  && d.G.length)   D.G  = d.G;
@@ -2086,25 +2187,20 @@ function _loadCloud() {
     }
     _initApp();
     _showSync('Data loaded!');
-  })
-  .catch(function(e) {
-    console.log('Load error:', e.message);
-    _initApp();
-    _showSync('Using offline data');
   });
 }
 
 // ── SAVE DATA TO CLOUD ──
 function _saveCloud() {
-  if (!_uid) return;
-  _db.collection('users').doc(_uid).set({
+  if (!_uid || !_idToken) return;
+  _fsPatch('users/' + _uid, {
     E:D.E||[], I:D.I||[], G:D.G||[], DB:D.DB||[],
     BL:D.BL||[], SB:D.SB||[], SA:D.SA||[], INV:D.INV||[],
     cur:D.cur||'USD',
     yr:D.yr||new Date().getFullYear(),
     mo:D.mo||'January',
     upd:new Date().toISOString()
-  }).catch(function(e){ console.log('Save error:', e.message); });
+  });
 }
 
 // ── OVERRIDE sv() ──
@@ -2139,9 +2235,10 @@ function _addSideBtns() {
   var d = document.createElement('div');
   d.id = '_fbBtns';
   d.style.cssText = 'padding:6px 16px 8px;border-top:1px solid rgba(255,255,255,.07);margin-top:6px';
-  d.innerHTML =
-    '<button onclick="_chPw()" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 18px;background:none;border:none;color:rgba(255,255,255,.4);font-size:.8rem;font-family:inherit;cursor:pointer;text-align:left;border-radius:6px;transition:.15s" onmouseenter="this.style.color='#86efac'" onmouseleave="this.style.color='rgba(255,255,255,.4)'">&#128273; Change Password</button>' +
-    '<button onclick="_fbOut()" style="display:flex;align-items:center;gap:10px;width:100%;padding:9px 18px;background:none;border:none;color:rgba(255,255,255,.4);font-size:.8rem;font-family:inherit;cursor:pointer;text-align:left;border-radius:6px;transition:.15s" onmouseenter="this.style.color='#fca5a5'" onmouseleave="this.style.color='rgba(255,255,255,.4)'">&#128682; Sign Out</button>';
+  d.innerHTML = [
+    '<button onclick="_chPw()" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 18px;background:none;border:none;color:rgba(255,255,255,.4);font-size:.8rem;font-family:inherit;cursor:pointer;text-align:left;border-radius:6px;transition:.15s" onmouseenter="this.style.color=&quot;#86efac&quot;" onmouseleave="this.style.color=&quot;rgba(255,255,255,.4)&quot;">&#128273; Change Password</button>',
+    '<button onclick="_fbOut()" style="display:flex;align-items:center;gap:10px;width:100%;padding:9px 18px;background:none;border:none;color:rgba(255,255,255,.4);font-size:.8rem;font-family:inherit;cursor:pointer;text-align:left;border-radius:6px;transition:.15s" onmouseenter="this.style.color=&quot;#fca5a5&quot;" onmouseleave="this.style.color=&quot;rgba(255,255,255,.4)&quot;">&#128682; Sign Out</button>'
+  ].join('');
   nav.appendChild(d);
 }
 
@@ -2186,13 +2283,25 @@ function lSignIn() {
   _lBtn('lBtnIn', true, 'Signing in...');
   document.getElementById('lErr').style.display='none';
   document.getElementById('lOk').style.display='none';
-  // Check Firebase is ready
-  if (!_auth) { _lErr('App loading... Please wait and try again'); _lBtn('lBtnIn',false,'Sign In'); return; }
-  _auth.signInWithEmailAndPassword(em, pw)
-  .then(function(){ _lOk('Welcome! Loading your dashboard...'); })
-  .catch(function(e) {
-    console.log('Login error:', e.code, e.message);
-    _lErr(_fbErr(e.code));
+  fetch(FB_AUTH_URL + ":signInWithPassword?key=" + FB_API_KEY, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({email:em, password:pw, returnSecureToken:true})
+  }).then(function(r){ return r.json(); }).then(function(d) {
+    if (d.error) {
+      _lErr(_fbErr(d.error.message));
+      _lBtn('lBtnIn', false, 'Sign In');
+      return;
+    }
+    _idToken = d.idToken; _refreshToken = d.refreshToken; _uid = d.localId;
+    try { localStorage.setItem('_fbSession', JSON.stringify({idToken:_idToken,refreshToken:_refreshToken,uid:_uid})); } catch(e){}
+    _lOk('Welcome! Loading your dashboard...');
+    setTimeout(function(){
+      document.getElementById('apxLogin').style.display = 'none';
+      document.body.classList.remove('locked');
+      _loadCloud();
+    }, 800);
+  }).catch(function() {
+    _lErr('Network error. Check your connection.');
     _lBtn('lBtnIn', false, 'Sign In');
   });
 }
@@ -2203,33 +2312,43 @@ function lSignIn() {
 function lReset() {
   var em = (document.getElementById('lEmail').value||'').trim();
   if (!em) { _lErr('Enter your email above first'); return; }
-  _auth.sendPasswordResetEmail(em)
-  .then(function(){ _lOk('Reset email sent! Check your inbox.'); })
-  .catch(function(){ _lErr('Cannot send email. Check the address.'); });
+  fetch(FB_AUTH_URL + ":sendOobCode?key=" + FB_API_KEY, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({requestType:'PASSWORD_RESET', email:em})
+  }).then(function(r){ return r.json(); }).then(function(d){
+    if (d.error) { _lErr('Cannot send email. Check the address.'); return; }
+    _lOk('Reset email sent! Check your inbox.');
+  }).catch(function(){ _lErr('Network error. Try again.'); });
 }
 
 // ── SIGN OUT ──
+function _fbSignOut(silent) {
+  _idToken = null; _refreshToken = null; _uid = null;
+  try { localStorage.removeItem('_fbSession'); } catch(e){}
+  document.getElementById('apxLogin').style.display = 'flex';
+  document.body.classList.add('locked');
+  if (!silent && typeof toast === 'function') toast('Signed out successfully');
+}
 function _fbOut() {
-  _auth.signOut().then(function(){
-    if(typeof toast==='function') toast('Signed out successfully');
-  });
+  _fbSignOut(false);
 }
 
 // ── CHANGE PASSWORD ──
 function _chPw() {
-  var user = _auth.currentUser;
-  if (!user) return;
+  if (!_idToken) return;
   var np = prompt('New password (6+ characters):');
   if (!np || np.length<6) { alert('Need 6+ characters'); return; }
   var np2 = prompt('Confirm new password:');
   if (np !== np2) { alert('Passwords do not match'); return; }
-  user.updatePassword(np)
-  .then(function(){ alert('Password changed successfully!'); })
-  .catch(function(e){
-    if (e.code==='auth/requires-recent-login')
-      alert('Please sign out and sign in again first.');
-    else alert('Error: '+e.message);
-  });
+  fetch(FB_AUTH_URL + ":update?key=" + FB_API_KEY, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({idToken:_idToken, password:np, returnSecureToken:true})
+  }).then(function(r){ return r.json(); }).then(function(d){
+    if (d.error) { alert('Error: ' + d.error.message); return; }
+    _idToken = d.idToken; _refreshToken = d.refreshToken;
+    try { localStorage.setItem('_fbSession', JSON.stringify({idToken:_idToken,refreshToken:_refreshToken,uid:_uid})); } catch(e){}
+    alert('Password changed successfully!');
+  }).catch(function(){ alert('Network error. Try again.'); });
 }
 
 // ── ENTER KEY SUPPORT ──
@@ -2240,7 +2359,7 @@ document.addEventListener('DOMContentLoaded', function(){
 // ═══════════════════════════════════════════════
 
 window.addEventListener('load', function() {
-  // Firebase onAuthStateChanged handles app init after login
+  // Session-based auth handles app init after login
   // Just focus email field
   var emailEl = document.getElementById('lEmail');
   if (emailEl) emailEl.focus();
@@ -2249,17 +2368,6 @@ window.addEventListener('load', function() {
 </script>
 
 <script>
-// ══ SERVICE WORKER REGISTRATION ══
-if('serviceWorker' in navigator){
-  window.addEventListener('load',function(){
-    navigator.serviceWorker.register('sw.js').then(function(reg){
-      // SW registered - app works offline
-    }).catch(function(err){
-      console.warn('SW registration failed:',err);
-    });
-  });
-}
-
 // ══ OFFLINE / ONLINE INDICATOR ══
 (function(){
   function showStatus(online){
@@ -2280,3 +2388,57 @@ if('serviceWorker' in navigator){
 </script>
 </body>
 </html>
+// ── SYNC BADGE ──
+function _showSync(msg, dur) {
+  var el = document.getElementById('syncBadge');
+  if (!el) return;
+  var txt = el.querySelector('span:last-child') || el;
+  if (el.querySelector('.syncDot')) txt = el.children[el.children.length-1];
+  el.style.display = 'flex';
+  try { txt.textContent = msg; } catch(e){}
+  clearTimeout(el._t);
+  el._t = setTimeout(function(){ el.style.display='none'; }, dur||2500);
+}
+
+// ── CHANGE PASSWORD (from cpWrap panel) ──
+function doChangePass() {
+  var cur = (document.getElementById('cpCur')||{}).value||'';
+  var np  = (document.getElementById('cpNew')||{}).value||'';
+  var con = (document.getElementById('cpCon')||{}).value||'';
+  if (!cur) { alert('Enter your current password'); return; }
+  if (np.length < 6) { alert('New password must be 6+ characters'); return; }
+  if (np !== con) { alert('Passwords do not match'); return; }
+  if (!_idToken) { alert('Not signed in'); return; }
+  // Re-authenticate first, then change password
+  var em = '';
+  fetch(FB_AUTH_URL + ":lookup?key=" + FB_API_KEY, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({idToken:_idToken})
+  }).then(function(r){ return r.json(); }).then(function(d){
+    if (!d.users || !d.users[0]) { alert('Session expired. Please sign in again.'); return; }
+    em = d.users[0].email;
+    // Re-sign-in to verify current password
+    return fetch(FB_AUTH_URL + ":signInWithPassword?key=" + FB_API_KEY, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:em, password:cur, returnSecureToken:true})
+    });
+  }).then(function(r){ return r && r.json(); }).then(function(d){
+    if (!d || d.error) { alert('Current password is incorrect'); return; }
+    _idToken = d.idToken; _refreshToken = d.refreshToken;
+    // Now update to new password
+    return fetch(FB_AUTH_URL + ":update?key=" + FB_API_KEY, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({idToken:_idToken, password:np, returnSecureToken:true})
+    });
+  }).then(function(r){ return r && r.json(); }).then(function(d){
+    if (!d) return;
+    if (d.error) { alert('Error: ' + d.error.message); return; }
+    _idToken = d.idToken; _refreshToken = d.refreshToken;
+    try { localStorage.setItem('_fbSession', JSON.stringify({idToken:_idToken,refreshToken:_refreshToken,uid:_uid})); } catch(e){}
+    alert('Password changed successfully!');
+    document.getElementById('cpWrap').classList.remove('show');
+    ['cpCur','cpNew','cpCon'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+  }).catch(function(){ alert('Network error. Try again.'); });
+}
+
+
