@@ -2056,16 +2056,27 @@ function _fbRefresh(cb) {
 
 // ── FIRESTORE HELPERS ──
 function _fsGet(path, cb) {
+  console.log('[APX] _fsGet: fetching', FB_FS_URL+'/'+path);
   fetch(FB_FS_URL + '/' + path, {
     headers:{'Authorization':'Bearer ' + _idToken}
   }).then(function(r){
+    console.log('[APX] _fsGet response status:', r.status);
     if (r.status === 401) {
+      console.log('[APX] _fsGet: 401 - refreshing token');
       _fbRefresh(function(ok){ if(ok) _fsGet(path,cb); else cb(null); });
       return null;
     }
-    if (!r.ok) { cb(null); return null; }
+    if (!r.ok) { 
+      console.log('[APX] _fsGet: error status', r.status);
+      cb(null); return null; 
+    }
     return r.json();
-  }).then(function(d){ if(d !== null && d !== undefined) cb(d); }).catch(function(){ cb(null); });
+  }).then(function(d){ 
+    if(d !== null && d !== undefined) cb(d); 
+  }).catch(function(e){ 
+    console.log('[APX] _fsGet: network error', e); 
+    cb(null); 
+  });
 }
 
 function _fsSet(path, data, cb) {
@@ -2113,19 +2124,22 @@ function _fsPatch(path, data, cb) {
   }
   var fields={};
   Object.keys(data).forEach(function(k){ fields[k]=toFsVal(data[k]); });
+  console.log('[APX] _fsPatch: saving to', FB_FS_URL+'/'+path);
   fetch(FB_FS_URL + '/' + path, {
     method:'PATCH',
     headers:{'Authorization':'Bearer '+_idToken,'Content-Type':'application/json'},
     body:JSON.stringify({fields:fields})
   }).then(function(r){
+    console.log('[APX] _fsPatch response status:', r.status);
     if (r.status===401) { _fbRefresh(function(ok){ if(ok) _fsPatch(path,data,cb); }); return; }
     if (!r.ok) {
-      r.json().then(function(e){ console.error('Firestore save error:', e.error && e.error.message); }).catch(function(){});
+      r.json().then(function(e){ console.error('[APX] Firestore save error:', e.error && e.error.message); }).catch(function(){});
       if (cb) cb(false);
     } else {
+      console.log('[APX] _fsPatch: SAVE SUCCESS');
       if (cb) cb(true);
     }
-  }).catch(function(e){ console.error('Firestore network error:', e); if(cb) cb(false); });
+  }).catch(function(e){ console.error('[APX] Firestore network error:', e); if(cb) cb(false); });
 }
 
 // ── PARSE FIRESTORE DOCUMENT TO PLAIN JS ──
@@ -2172,11 +2186,24 @@ window.addEventListener('DOMContentLoaded', function() {
   }
 });
 
+// ── SYNC BADGE ──
+function _showSync(msg, dur) {
+  var el = document.getElementById('syncBadge');
+  if (!el) return;
+  var txt = el.querySelector('#syncMsg') || el;
+  el.style.display = 'flex';
+  try { txt.textContent = msg; } catch(e){}
+  clearTimeout(el._t);
+  el._t = setTimeout(function(){ el.style.display='none'; }, dur||2500);
+}
+
 // ── LOAD DATA FROM CLOUD ──
 function _loadCloud() {
-  if (!_uid || !_idToken) { _initApp(); return; }
+  if (!_uid || !_idToken) { console.log('[APX] _loadCloud: no uid/token'); _initApp(); return; }
+  console.log('[APX] _loadCloud: fetching from Firestore for uid='+_uid);
   _showSync('Loading your data...', 8000);
   _fsGet('users/' + _uid, function(doc) {
+    console.log('[APX] _fsGet response:', doc ? (doc.fields ? 'HAS DATA' : 'NO FIELDS - doc='+JSON.stringify(doc).slice(0,100)) : 'NULL');
     if (doc && doc.fields) {
       // Cloud data exists - merge it into D
       var d = _fsToJs(doc);
@@ -2376,11 +2403,12 @@ function lSignIn() {
     try { localStorage.setItem('_fbSession', JSON.stringify({idToken:_idToken,refreshToken:_refreshToken,uid:_uid})); } catch(e){}
     _lOk('Welcome! Loading your dashboard...');
     setTimeout(function(){
+      console.log('[APX] Login success. uid='+_uid+' token='+(_idToken?'YES':'NO'));
       document.getElementById('apxLogin').style.display = 'none';
       document.body.classList.remove('locked');
-      // Show localStorage data immediately - no blank screen
+      console.log('[APX] Calling _initApp with localStorage data...');
       _initApp();
-      // Then load cloud data on top
+      console.log('[APX] Calling _loadCloud...');
       _loadCloud();
     }, 800);
   }).catch(function() {
