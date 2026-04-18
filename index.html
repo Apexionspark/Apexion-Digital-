@@ -1207,7 +1207,7 @@ function goPage(id,btn){
   document.getElementById('pg-'+id).classList.add('on');
   if(btn)btn.classList.add('on');
   closeSB();
-  const map={dashboard:rDash,expenses:rExp,income:rInc,savings:rSav,debt:rDebt,bills:rBills,subs:rSubs,calendar:rCal,annual:rAnn,tax:initTaxPage,savacct:rSavAcct};
+  const map={dashboard:rDash,expenses:rExp,income:rInc,savings:rSav,debt:rDebt,bills:rBills,subs:rSubs,calendar:rCal,annual:rAnn,tax:initTaxPage,savacct:rSavAcct,invest:rInvest,report:rReport};
   if(map[id])map[id]();
 }
 
@@ -1715,7 +1715,7 @@ function calcProp(){
 // SAVINGS ACCOUNT
 // ══════════════════════════════════════════════
 function rSavAcct(){
-  const entries = D.savAcct || [];
+  const entries = D.SA || [];
   const el = id => document.getElementById(id);
 
   // Calculate totals
@@ -1777,8 +1777,8 @@ function addSavEntry(){
   const desc = document.getElementById('sav-desc').value.trim();
   if(!date){ toast('⚠️ Please select a date'); return; }
   if(!amt || amt <= 0){ toast('⚠️ Please enter a valid amount'); return; }
-  if(!D.savAcct) D.savAcct = [];
-  D.savAcct.push({id: Date.now(), date, type, amount: amt, description: desc});
+  if(!D.SA) D.SA = [];
+  D.SA.push({id: Date.now(), date, type, amount: amt, description: desc});
   sv(); rSavAcct();
   document.getElementById('sav-amt').value = '';
   document.getElementById('sav-desc').value = '';
@@ -1786,16 +1786,16 @@ function addSavEntry(){
 }
 
 function delSavEntry(id){
-  if(!D.savAcct) return;
-  D.savAcct = D.savAcct.filter(e => e.id !== id);
+  if(!D.SA) return;
+  D.SA = D.SA.filter(e => e.id !== id);
   sv(); rSavAcct();
   toast('Entry removed');
 }
 
 function clearSavAcct(){
-  if(!D.savAcct || !D.savAcct.length){ toast('No entries to clear'); return; }
+  if(!D.SA || !D.SA.length){ toast('No entries to clear'); return; }
   if(confirm('Clear ALL savings entries? This cannot be undone!')){
-    D.savAcct = [];
+    D.SA = [];
     sv(); rSavAcct();
     toast('All savings entries cleared');
   }
@@ -1827,8 +1827,8 @@ function saveSavModal(){
   const desc = document.getElementById('sav-modal-desc').value.trim();
   const date = document.getElementById('sav-modal-date').value || today();
   if(!amt || amt <= 0){ toast('⚠️ Enter a valid amount'); return; }
-  if(!D.savAcct) D.savAcct = [];
-  D.savAcct.push({id: Date.now(), date, type, amount: amt, description: desc});
+  if(!D.SA) D.SA = [];
+  D.SA.push({id: Date.now(), date, type, amount: amt, description: desc});
   sv(); closeSavModal(); rSavAcct();
   toast(type === 'add' ? '✓ ' + fmt(amt) + ' added to savings! 💰' : '✓ ' + fmt(amt) + ' withdrawn from savings!');
 }
@@ -2223,6 +2223,13 @@ function _initApp() {
     var el = document.getElementById(id);
     if (el && t) el.value = t;
   });
+  // Activate dashboard page and nav
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('on'); });
+  document.querySelectorAll('.ni').forEach(function(b){ b.classList.remove('on'); });
+  var dashPage = document.getElementById('pg-dashboard');
+  var dashBtn  = document.querySelector('.ni[data-p="dashboard"]');
+  if (dashPage) dashPage.classList.add('on');
+  if (dashBtn)  dashBtn.classList.add('on');
   rDash();
   _addSideBtns();
 }
