@@ -2176,6 +2176,7 @@ function _loadCloud() {
   _showSync('Loading your data...', 8000);
   _fsGet('users/' + _uid, function(doc) {
     if (doc && doc.fields) {
+      // Cloud data exists - merge it into D
       var d = _fsToJs(doc);
       if (d.E  && d.E.length)   D.E  = d.E;
       if (d.I  && d.I.length)   D.I  = d.I;
@@ -2189,10 +2190,21 @@ function _loadCloud() {
       if (d.yr)  D.yr  = d.yr;
       if (d.mo)  D.mo  = d.mo;
       try { localStorage.setItem('apx_v6', JSON.stringify(D)); } catch(e){}
+      _initApp();
+      initSels();
+      _showSync('✓ Cloud data loaded!');
+    } else {
+      // No cloud data - D already has localStorage data from ld() on page load
+      // Push localStorage data up to cloud so other devices get it
+      _initApp();
+      initSels();
+      if (D.E.length || D.I.length || D.G.length || D.BL.length || D.DB.length) {
+        _showSync('Backing up local data to cloud...', 5000);
+        _saveCloud();
+      } else {
+        _showSync('Ready');
+      }
     }
-    _initApp();
-    initSels();
-    _showSync('Data loaded!');
   });
 }
 
@@ -2244,6 +2256,50 @@ function _initApp() {
   _addSideBtns();
 }
 
+// ── MANUAL CLOUD SYNC ──
+function _manualLoad() {
+  if (!_uid || !_idToken) { alert('Not signed in'); return; }
+  _showSync('Loading from cloud...', 8000);
+  _fsGet('users/' + _uid, function(doc) {
+    if (!doc) { _showSync('⚠ Could not reach cloud', 3000); return; }
+    if (doc && doc.fields) {
+      var d = _fsToJs(doc);
+      if (d.E  && d.E.length)   D.E  = d.E;
+      if (d.I  && d.I.length)   D.I  = d.I;
+      if (d.G  && d.G.length)   D.G  = d.G;
+      if (d.DB && d.DB.length)  D.DB = d.DB;
+      if (d.BL && d.BL.length)  D.BL = d.BL;
+      if (d.SB && d.SB.length)  D.SB = d.SB;
+      if (d.SA && d.SA.length)  D.SA = d.SA;
+      if (d.INV && d.INV.length) D.INV = d.INV;
+      if (d.cur) D.cur = d.cur;
+      if (d.yr)  D.yr  = d.yr;
+      if (d.mo)  D.mo  = d.mo;
+      try { localStorage.setItem('apx_v6', JSON.stringify(D)); } catch(e){}
+      initSels(); updLbls(); rfr();
+      _showSync('✓ Data loaded from cloud!', 3000);
+    } else {
+      _showSync('⚠ No cloud data found', 3000);
+    }
+  });
+}
+
+function _manualSave() {
+  if (!_uid || !_idToken) { alert('Not signed in'); return; }
+  _showSync('Saving to cloud...', 4000);
+  var data = {
+    E:D.E||[], I:D.I||[], G:D.G||[], DB:D.DB||[],
+    BL:D.BL||[], SB:D.SB||[], SA:D.SA||[], INV:D.INV||[],
+    cur:D.cur||'USD',
+    yr:D.yr||new Date().getFullYear(),
+    mo:D.mo||'January',
+    upd:new Date().toISOString()
+  };
+  _fsPatch('users/' + _uid, data, function(ok) {
+    _showSync(ok !== false ? '✓ Saved to cloud!' : '⚠ Save failed - check console', 3000);
+  });
+}
+
 // ── SIDEBAR BUTTONS ──
 function _addSideBtns() {
   if (document.getElementById('_fbBtns')) return;
@@ -2252,9 +2308,12 @@ function _addSideBtns() {
   var d = document.createElement('div');
   d.id = '_fbBtns';
   d.style.cssText = 'padding:6px 16px 8px;border-top:1px solid rgba(255,255,255,.07);margin-top:6px';
+  var btnStyle = 'display:flex;align-items:center;gap:8px;width:100%;padding:9px 18px;background:none;border:none;font-size:.8rem;font-family:inherit;cursor:pointer;text-align:left;border-radius:6px;transition:.15s;';
   d.innerHTML = [
-    '<button onclick="_chPw()" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 18px;background:none;border:none;color:rgba(255,255,255,.4);font-size:.8rem;font-family:inherit;cursor:pointer;text-align:left;border-radius:6px;transition:.15s" onmouseenter="this.style.color=&quot;#86efac&quot;" onmouseleave="this.style.color=&quot;rgba(255,255,255,.4)&quot;">&#128273; Change Password</button>',
-    '<button onclick="_fbOut()" style="display:flex;align-items:center;gap:10px;width:100%;padding:9px 18px;background:none;border:none;color:rgba(255,255,255,.4);font-size:.8rem;font-family:inherit;cursor:pointer;text-align:left;border-radius:6px;transition:.15s" onmouseenter="this.style.color=&quot;#fca5a5&quot;" onmouseleave="this.style.color=&quot;rgba(255,255,255,.4)&quot;">&#128682; Sign Out</button>'
+    '<button onclick="_manualLoad()" style="'+btnStyle+'color:rgba(255,255,255,.4)" onmouseenter="this.style.color=\'#93c5fd\'" onmouseleave="this.style.color=\'rgba(255,255,255,.4)\'">&#9729; Load from Cloud</button>',
+    '<button onclick="_manualSave()" style="'+btnStyle+'color:rgba(255,255,255,.4)" onmouseenter="this.style.color=\'#86efac\'" onmouseleave="this.style.color=\'rgba(255,255,255,.4)\'">&#9729; Save to Cloud</button>',
+    '<button onclick="_chPw()" style="'+btnStyle+'color:rgba(255,255,255,.4)" onmouseenter="this.style.color=\'#86efac\'" onmouseleave="this.style.color=\'rgba(255,255,255,.4)\'">&#128273; Change Password</button>',
+    '<button onclick="_fbOut()" style="'+btnStyle+'color:rgba(255,255,255,.4)" onmouseenter="this.style.color=\'#fca5a5\'" onmouseleave="this.style.color=\'rgba(255,255,255,.4)\'">&#128682; Sign Out</button>'
   ].join('');
   nav.appendChild(d);
 }
@@ -2376,7 +2435,8 @@ document.addEventListener('DOMContentLoaded', function(){
 // ═══════════════════════════════════════════════
 
 window.addEventListener('load', function() {
-  // Populate sidebar selects immediately so they show defaults
+  // Load localStorage data immediately - before any async/cloud
+  ld();
   initSels();
   updLbls();
   // Focus email field
