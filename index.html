@@ -45,7 +45,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .sb-tag{font-size:.58rem;color:rgba(255,255,255,.3);letter-spacing:.09em;text-transform:uppercase;margin-top:4px}
 .sb-ctrls{padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;gap:7px}
 .sb-lbl{font-size:.58rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.09em;display:block;margin-bottom:4px}
-.sb-sel{width:100%;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.13);color:#fff;padding:7px 10px;border-radius:6px;font-size:.8rem;font-family:inherit;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none}
+.sb-sel{width:100%;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.13);color:#fff;padding:7px 10px;border-radius:6px;font-size:.8rem;font-family:inherit;cursor:pointer;outline:none}
 .sb-sel option{background:#2a2d31;color:#fff}
 .sb-nav{flex:1;padding:7px 0;overflow-y:auto}
 .nav-grp{padding:12px 18px 4px;font-size:.57rem;color:rgba(255,255,255,.2);text-transform:uppercase;letter-spacing:.1em;font-weight:700}
@@ -332,8 +332,6 @@ body.dark .sr .slv[style*="color:var(--gold)"]{color:#FCD34D!important}
   font-family: inherit;
   cursor: pointer;
   outline: none;
-  appearance: none;
-  -webkit-appearance: none;
   transition: all .2s ease;
   box-shadow: inset 0 1px 3px rgba(0,0,0,.2);
 }
@@ -2186,6 +2184,7 @@ function _loadCloud() {
       try { localStorage.setItem('apx_v6', JSON.stringify(D)); } catch(e){}
     }
     _initApp();
+    initSels();
     _showSync('Data loaded!');
   });
 }
@@ -2366,8 +2365,10 @@ document.addEventListener('DOMContentLoaded', function(){
 // ═══════════════════════════════════════════════
 
 window.addEventListener('load', function() {
-  // Session-based auth handles app init after login
-  // Just focus email field
+  // Populate sidebar selects immediately so they show defaults
+  initSels();
+  updLbls();
+  // Focus email field
   var emailEl = document.getElementById('lEmail');
   if (emailEl) emailEl.focus();
 });
