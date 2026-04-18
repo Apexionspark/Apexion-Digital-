@@ -431,6 +431,27 @@ body.locked { overflow:hidden; }
 .syncDot { width:6px;height:6px;border-radius:50%;background:#86efac;animation:sPulse 1.5s infinite; }
 @keyframes sPulse { 0%,100%{opacity:1}50%{opacity:.3} }
 
+
+/* ── DARK MODE BADGE & CALENDAR FIXES ── */
+body.dark .bi{background:rgba(107,143,113,.25)!important;color:#86efac!important}
+body.dark .be{background:rgba(201,107,107,.25)!important;color:#fca5a5!important}
+body.dark .bn{background:rgba(255,255,255,.1)!important;color:#CBD5E1!important}
+body.dark .chip{background:rgba(255,255,255,.08)!important;color:#CBD5E1!important}
+body.dark .dd-summary{background:rgba(91,133,168,.15)!important;border:1px solid rgba(91,133,168,.2)!important}
+body.dark .dd-summary .dsl{color:#94A3B8!important}
+body.dark .dd-summary .dsv{color:#fff!important}
+body.dark .day-detail{background:#1A1D27!important}
+body.dark td{color:#E2E8F0!important}
+body.dark th{color:#94A3B8!important}
+body.dark [style*="color:var(--sage-d)"]{color:#86efac!important}
+body.dark [style*="color:var(--red)"]{color:#fca5a5!important}
+body.dark [style*="color:var(--mid)"]{color:#94A3B8!important}
+body.dark [style*="color:var(--gold)"]{color:#fcd34d!important}
+body.dark select option{background:#1E2130!important;color:#fff!important}
+body.dark .sb-sel option{background:#1E2130!important;color:#fff!important}
+body.dark .cat-amt{filter:brightness(1.6)}
+body.dark .kpi-v{color:#fff!important}
+body.dark .empty{color:#64748B!important}
 </style>
 <!-- Firebase: using REST API, no SDK needed -->
 </head>
