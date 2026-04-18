@@ -296,6 +296,31 @@ body:not(.dark) .sb-ft{color:rgba(255,255,255,.4)!important}
 .tog-track{width:36px;height:20px;background:rgba(255,255,255,.2);border-radius:10px;position:relative;transition:.3s;flex-shrink:0}
 .tog-thumb{width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:.3s}
 body.dark .tog-track{background:#3D5C40}
+body.dark .bi{background:rgba(107,143,113,.25)!important;color:#86efac!important}
+body.dark .be{background:rgba(201,107,107,.25)!important;color:#fca5a5!important}
+body.dark .chip{background:rgba(255,255,255,.1)!important;color:#E2E8F0!important}
+body.dark td{color:#E2E8F0!important}
+body.dark .cat-pct{color:#aaa!important}
+body.dark .cat-amt{filter:brightness(1.6)}
+body.dark .kpi-v{color:#fff!important}
+body.dark .card{background:var(--white)!important;border-color:rgba(255,255,255,.08)!important}
+body.dark td{color:#E2E8F0!important}
+body.dark th{color:#aaa!important}
+body.dark [style*="color:var(--sage-d)"]{color:#86efac!important}
+body.dark [style*="color:var(--red)"]{color:#fca5a5!important}
+body.dark [style*="color:var(--mid)"]{color:#aaa!important}
+body.dark .dd-summary{background:rgba(91,133,168,.2)!important}
+body.dark .dd-summary .dsl{color:#aaa!important}
+body.dark .dd-summary .dsv{color:#fff!important}
+body.dark .day-detail{background:var(--white)!important}
+body.dark .amt-pos{color:#86efac!important}
+body.dark .amt-neg{color:#fca5a5!important}
+body.dark .bn{background:rgba(255,255,255,.1)!important;color:#E2E8F0!important}
+body.dark .kpi-s{color:#aaa!important}
+body.dark .kpi-l{color:#fff!important}
+body.dark input,body.dark select,body.dark textarea{background:rgba(255,255,255,.07)!important;color:#fff!important;border-color:rgba(255,255,255,.15)!important}
+body.dark input::placeholder,body.dark textarea::placeholder{color:rgba(255,255,255,.35)!important}
+body.dark .ph p{color:#aaa!important}
 body.dark .tog-thumb{transform:translateX(16px)}
 /* DARK MODE - summary stat rows (.sr) */
 body.dark .sr{background:#1E2130!important;border:1px solid #2A2D3E}
@@ -1297,7 +1322,7 @@ function rExp(){
   if(cf)rows=rows.filter(e=>e.category===cf);
   const tb=$('eTb');
   if(!rows.length){tb.innerHTML='<tr><td colspan="7" class="empty">No expenses found</td></tr>';return;}
-  tb.innerHTML=rows.map(e=>`<tr><td style="font-family:'JetBrains Mono',monospace;font-size:.72rem;white-space:nowrap">${e.date}</td><td style="font-weight:600">${e.description}</td><td><span class="chip">${CICO[e.category]||''} ${e.category}</span></td><td><span class="bdg bn">${e.payment}</span></td><td style="color:var(--mid);font-size:.75rem">${e.notes||'—'}</td><td style="text-align:right;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--red);white-space:nowrap">${fmt(e.amount)}</td><td><button class="btn btn-sm btn-gh btn-ico" onclick="delE(${e.id})" style="color:var(--red);border-color:var(--red-l)">✕</button></td></tr>`).join('');
+  tb.innerHTML=rows.map(e=>`<tr><td style="font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--mid);white-space:nowrap">${e.date}</td><td style="font-weight:600;color:inherit">${e.description||'—'}</td><td><span class="chip">${CICO[e.category]||''} ${e.category}</span></td><td><span class="bdg bn">${e.payment||'—'}</span></td><td style="font-size:.75rem;color:var(--mid)">${e.notes||'—'}</td><td style="text-align:right;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--red);white-space:nowrap" class="amt-neg">${fmt(e.amount)}</td><td><button class="btn btn-sm btn-gh btn-ico" onclick="delE(${e.id})" style="color:var(--red);border-color:var(--red-l)">✕</button></td></tr>`).join('');
 }
 
 // ══ INCOME ══
@@ -1313,7 +1338,7 @@ function rInc(){
   $('i-mo').textContent=fmt(sm(mi,'amount'));$('i-all').textContent=fmt(sm(D.I,'amount'));$('i-cnt').textContent=D.I.length;
   const rows=[...D.I].sort((a,b)=>new Date(b.date)-new Date(a.date));const tb=$('iTb');
   if(!rows.length){tb.innerHTML='<tr><td colspan="6" class="empty">No income entries yet</td></tr>';return;}
-  tb.innerHTML=rows.map(i=>`<tr><td style="font-family:'JetBrains Mono',monospace;font-size:.72rem;white-space:nowrap">${i.date}</td><td style="font-weight:600">${i.description}</td><td><span class="bdg bi">${i.source}</span></td><td style="color:var(--mid);font-size:.75rem">${i.notes||'—'}</td><td style="text-align:right;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--sage-d);white-space:nowrap">+${fmt(i.amount)}</td><td><button class="btn btn-sm btn-gh btn-ico" onclick="delI(${i.id})" style="color:var(--red);border-color:var(--red-l)">✕</button></td></tr>`).join('');
+  tb.innerHTML=rows.map(i=>`<tr><td style="font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--mid);white-space:nowrap">${i.date}</td><td style="font-weight:600;color:inherit">${i.description||'—'}</td><td><span class="bdg bi">${i.source||'—'}</span></td><td style="font-size:.75rem;color:var(--mid)">${i.notes||'—'}</td><td style="text-align:right;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--sage-d);white-space:nowrap" class="amt-pos">+${fmt(i.amount)}</td><td><button class="btn btn-sm btn-gh btn-ico" onclick="delI(${i.id})" style="color:var(--red);border-color:var(--red-l)">✕</button></td></tr>`).join('');
 }
 
 // ══ SAVINGS ══
@@ -2365,6 +2390,70 @@ function _lBtn(id, dis, txt) {
   var b=document.getElementById(id);
   if(b){b.disabled=dis;b.textContent=txt;}
 }
+// ── CHANGE PASSWORD (panel) ──
+function doChangePass() {
+  var cur = (document.getElementById('cpCur') || {}).value || '';
+  var np  = (document.getElementById('cpNew') || {}).value || '';
+  var con = (document.getElementById('cpCon') || {}).value || '';
+  var errEl = document.getElementById('cpErr');
+  var okEl  = document.getElementById('cpOk');
+  function cpErr(msg) { if(errEl){errEl.textContent=msg;errEl.style.display='block';} if(okEl) okEl.style.display='none'; }
+  function cpOk(msg)  { if(okEl){okEl.textContent=msg;okEl.style.display='block';}  if(errEl) errEl.style.display='none'; }
+  function cpClear()  { if(errEl) errEl.style.display='none'; if(okEl) okEl.style.display='none'; }
+  cpClear();
+  if (!cur)          { cpErr('Enter your current password'); return; }
+  if (np.length < 6) { cpErr('New password must be at least 6 characters'); return; }
+  if (np !== con)    { cpErr('Passwords do not match'); return; }
+  if (!_idToken)     { cpErr('Not signed in — please refresh and login again'); return; }
+  // Step 1: get user email from token
+  fetch(FB_AUTH_URL + ':lookup?key=' + FB_API_KEY, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({idToken: _idToken})
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d) {
+    if (!d.users || !d.users[0]) { cpErr('Session expired. Please sign out and sign in again.'); return; }
+    var email = d.users[0].email;
+    // Step 2: re-authenticate with current password
+    return fetch(FB_AUTH_URL + ':signInWithPassword?key=' + FB_API_KEY, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({email: email, password: cur, returnSecureToken: true})
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d2) {
+      if (d2.error) { cpErr('Current password is incorrect'); return; }
+      _idToken = d2.idToken; _refreshToken = d2.refreshToken;
+      // Step 3: update to new password
+      return fetch(FB_AUTH_URL + ':update?key=' + FB_API_KEY, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({idToken: _idToken, password: np, returnSecureToken: true})
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(d3) {
+        if (d3.error) { cpErr('Error: ' + d3.error.message); return; }
+        _idToken = d3.idToken; _refreshToken = d3.refreshToken;
+        try { localStorage.setItem('_fbSession', JSON.stringify({idToken:_idToken,refreshToken:_refreshToken,uid:_uid})); } catch(e){}
+        cpOk('✓ Password changed successfully!');
+        // Clear inputs
+        ['cpCur','cpNew','cpCon'].forEach(function(id){
+          var el = document.getElementById(id);
+          if (el) el.value = '';
+        });
+        // Close panel after 2 seconds
+        setTimeout(function(){
+          var wrap = document.getElementById('cpWrap');
+          if (wrap) wrap.classList.remove('show');
+          if (okEl) okEl.style.display = 'none';
+        }, 2000);
+      });
+    });
+  })
+  .catch(function(){ cpErr('Network error. Check your connection and try again.'); });
+}
+
 function _fbErr(code) {
   var m = {
     'auth/user-not-found':        'No account found with this email.',
