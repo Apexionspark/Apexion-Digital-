@@ -2192,12 +2192,14 @@ function _loadCloud() {
       try { localStorage.setItem('apx_v6', JSON.stringify(D)); } catch(e){}
       _initApp();
       initSels();
+      rfr();
       _showSync('✓ Cloud data loaded!');
     } else {
       // No cloud data - D already has localStorage data from ld() on page load
       // Push localStorage data up to cloud so other devices get it
       _initApp();
       initSels();
+      rfr();
       if (D.E.length || D.I.length || D.G.length || D.BL.length || D.DB.length) {
         _showSync('Backing up local data to cloud...', 5000);
         _saveCloud();
