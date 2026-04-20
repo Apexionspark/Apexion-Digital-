@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#1E2124">
+<link rel="manifest" href="manifest.json">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -45,7 +46,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .sb-tag{font-size:.58rem;color:rgba(255,255,255,.3);letter-spacing:.09em;text-transform:uppercase;margin-top:4px}
 .sb-ctrls{padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;gap:7px}
 .sb-lbl{font-size:.58rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.09em;display:block;margin-bottom:4px}
-.sb-sel{width:100%;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.13);color:#fff;padding:7px 10px;border-radius:6px;font-size:.8rem;font-family:inherit;cursor:pointer;outline:none}
+.sb-sel{width:100%;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.13);color:#fff;padding:7px 10px;border-radius:6px;font-size:.8rem;font-family:inherit;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none}
 .sb-sel option{background:#2a2d31;color:#fff}
 .sb-nav{flex:1;padding:7px 0;overflow-y:auto}
 .nav-grp{padding:12px 18px 4px;font-size:.57rem;color:rgba(255,255,255,.2);text-transform:uppercase;letter-spacing:.1em;font-weight:700}
@@ -332,6 +333,8 @@ body.dark .sr .slv[style*="color:var(--gold)"]{color:#FCD34D!important}
   font-family: inherit;
   cursor: pointer;
   outline: none;
+  appearance: none;
+  -webkit-appearance: none;
   transition: all .2s ease;
   box-shadow: inset 0 1px 3px rgba(0,0,0,.2);
 }
@@ -431,29 +434,7 @@ body.locked { overflow:hidden; }
 .syncDot { width:6px;height:6px;border-radius:50%;background:#86efac;animation:sPulse 1.5s infinite; }
 @keyframes sPulse { 0%,100%{opacity:1}50%{opacity:.3} }
 
-
-/* ── DARK MODE BADGE & CALENDAR FIXES ── */
-body.dark .bi{background:rgba(107,143,113,.25)!important;color:#86efac!important}
-body.dark .be{background:rgba(201,107,107,.25)!important;color:#fca5a5!important}
-body.dark .bn{background:rgba(255,255,255,.1)!important;color:#CBD5E1!important}
-body.dark .chip{background:rgba(255,255,255,.08)!important;color:#CBD5E1!important}
-body.dark .dd-summary{background:rgba(91,133,168,.15)!important;border:1px solid rgba(91,133,168,.2)!important}
-body.dark .dd-summary .dsl{color:#94A3B8!important}
-body.dark .dd-summary .dsv{color:#fff!important}
-body.dark .day-detail{background:#1A1D27!important}
-body.dark td{color:#E2E8F0!important}
-body.dark th{color:#94A3B8!important}
-body.dark [style*="color:var(--sage-d)"]{color:#86efac!important}
-body.dark [style*="color:var(--red)"]{color:#fca5a5!important}
-body.dark [style*="color:var(--mid)"]{color:#94A3B8!important}
-body.dark [style*="color:var(--gold)"]{color:#fcd34d!important}
-body.dark select option{background:#1E2130!important;color:#fff!important}
-body.dark .sb-sel option{background:#1E2130!important;color:#fff!important}
-body.dark .cat-amt{filter:brightness(1.6)}
-body.dark .kpi-v{color:#fff!important}
-body.dark .empty{color:#64748B!important}
 </style>
-<!-- Firebase: using REST API, no SDK needed -->
 </head>
 <body class="locked">
 
@@ -1020,6 +1001,10 @@ body.dark .empty{color:#64748B!important}
   </div>
 </div>
 <div class="toast" id="toast"></div>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
 <script>
 // ══ CURRENCIES ══
 const CURS=[{c:'USD',s:'$',n:'US Dollar'},{c:'EUR',s:'€',n:'Euro'},{c:'GBP',s:'£',n:'British Pound'},{c:'PKR',s:'₨',n:'Pakistani Rupee'},{c:'INR',s:'₹',n:'Indian Rupee'},{c:'AED',s:'د.إ',n:'UAE Dirham'},{c:'SAR',s:'﷼',n:'Saudi Riyal'},{c:'JPY',s:'¥',n:'Japanese Yen'},{c:'CNY',s:'¥',n:'Chinese Yuan'},{c:'KRW',s:'₩',n:'Korean Won'},{c:'AUD',s:'A$',n:'Australian Dollar'},{c:'CAD',s:'C$',n:'Canadian Dollar'},{c:'CHF',s:'Fr',n:'Swiss Franc'},{c:'SGD',s:'S$',n:'Singapore Dollar'},{c:'MYR',s:'RM',n:'Malaysian Ringgit'},{c:'IDR',s:'Rp',n:'Indonesian Rupiah'},{c:'THB',s:'฿',n:'Thai Baht'},{c:'PHP',s:'₱',n:'Philippine Peso'},{c:'BDT',s:'৳',n:'Bangladeshi Taka'},{c:'TRY',s:'₺',n:'Turkish Lira'},{c:'RUB',s:'₽',n:'Russian Ruble'},{c:'BRL',s:'R$',n:'Brazilian Real'},{c:'MXN',s:'Mex$',n:'Mexican Peso'},{c:'ZAR',s:'R',n:'South African Rand'},{c:'NGN',s:'₦',n:'Nigerian Naira'},{c:'EGP',s:'£',n:'Egyptian Pound'},{c:'QAR',s:'ر.ق',n:'Qatari Riyal'},{c:'KWD',s:'KD',n:'Kuwaiti Dinar'},{c:'OMR',s:'ر.ع.',n:'Omani Rial'},{c:'ILS',s:'₪',n:'Israeli Shekel'},{c:'SEK',s:'kr',n:'Swedish Krona'},{c:'NOK',s:'kr',n:'Norwegian Krone'},{c:'PLN',s:'zł',n:'Polish Zloty'},{c:'NZD',s:'NZ$',n:'New Zealand Dollar'},{c:'HKD',s:'HK$',n:'Hong Kong Dollar'}];
@@ -1190,10 +1175,10 @@ function ld(){
   }
 }
 function sv(){
-  try { localStorage.setItem('apx_v6', JSON.stringify(D)); } catch(e) {}
-  if (_uid && _idToken) {
-    clearTimeout(_stmr);
-    _stmr = setTimeout(_saveCloud, 2000);
+  try {
+    localStorage.setItem('apx_v6', JSON.stringify(D));
+  } catch(e) {
+    console.log('Storage error:', e);
   }
 }
 
@@ -1734,7 +1719,7 @@ function calcProp(){
 // SAVINGS ACCOUNT
 // ══════════════════════════════════════════════
 function rSavAcct(){
-  const entries = D.SA || [];
+  const entries = D.savAcct || [];
   const el = id => document.getElementById(id);
 
   // Calculate totals
@@ -1796,8 +1781,8 @@ function addSavEntry(){
   const desc = document.getElementById('sav-desc').value.trim();
   if(!date){ toast('⚠️ Please select a date'); return; }
   if(!amt || amt <= 0){ toast('⚠️ Please enter a valid amount'); return; }
-  if(!D.SA) D.SA = [];
-  D.SA.push({id: Date.now(), date, type, amount: amt, description: desc});
+  if(!D.savAcct) D.savAcct = [];
+  D.savAcct.push({id: Date.now(), date, type, amount: amt, description: desc});
   sv(); rSavAcct();
   document.getElementById('sav-amt').value = '';
   document.getElementById('sav-desc').value = '';
@@ -1805,16 +1790,16 @@ function addSavEntry(){
 }
 
 function delSavEntry(id){
-  if(!D.SA) return;
-  D.SA = D.SA.filter(e => e.id !== id);
+  if(!D.savAcct) return;
+  D.savAcct = D.savAcct.filter(e => e.id !== id);
   sv(); rSavAcct();
   toast('Entry removed');
 }
 
 function clearSavAcct(){
-  if(!D.SA || !D.SA.length){ toast('No entries to clear'); return; }
+  if(!D.savAcct || !D.savAcct.length){ toast('No entries to clear'); return; }
   if(confirm('Clear ALL savings entries? This cannot be undone!')){
-    D.SA = [];
+    D.savAcct = [];
     sv(); rSavAcct();
     toast('All savings entries cleared');
   }
@@ -1846,8 +1831,8 @@ function saveSavModal(){
   const desc = document.getElementById('sav-modal-desc').value.trim();
   const date = document.getElementById('sav-modal-date').value || today();
   if(!amt || amt <= 0){ toast('⚠️ Enter a valid amount'); return; }
-  if(!D.SA) D.SA = [];
-  D.SA.push({id: Date.now(), date, type, amount: amt, description: desc});
+  if(!D.savAcct) D.savAcct = [];
+  D.savAcct.push({id: Date.now(), date, type, amount: amt, description: desc});
   sv(); closeSavModal(); rSavAcct();
   toast(type === 'add' ? '✓ ' + fmt(amt) + ' added to savings! 💰' : '✓ ' + fmt(amt) + ' withdrawn from savings!');
 }
@@ -1863,34 +1848,67 @@ window._oldLoad=(()=>{
 // ══ 500 VALID KEYS ══
 
 
+
+var INV_META = {
+  'Stocks':       {ico:'📊', color:'3D7EC8', bg:'EEF4FF'},
+  'Crypto':       {ico:'₿',  color:'F59E0B', bg:'FFFBEB'},
+  'Mutual Funds': {ico:'📁', color:'7C3AED', bg:'F5F3FF'},
+  'Real Estate':  {ico:'🏠', color:'C96B6B', bg:'FFF0F0'},
+  'Gold':         {ico:'🥇', color:'B8932A', bg:'FFFBEB'},
+  'Bonds':        {ico:'📜', color:'5B85A8', bg:'EBF1F6'},
+  'ETFs':         {ico:'📈', color:'10B981', bg:'ECFDF5'},
+  'Business':     {ico:'🏢', color:'2E5C3F', bg:'E8F5EC'},
+  'NFTs':         {ico:'🎨', color:'7C3AED', bg:'F5F3FF'},
+  'Other':        {ico:'💼', color:'6B7280', bg:'F1F5F9'}
+};
+
 function getMeta(cat){return INV_META[cat]||{ico:'💼',color:'6B7280',bg:'F1F5F9'};}
 
 function addInv(){
-  var cat=document.getElementById('inv-cat').value;
-  var name=document.getElementById('inv-name').value.trim();
-  var amt=parseFloat(document.getElementById('inv-amt').value);
-  var cur=parseFloat(document.getElementById('inv-cur').value)||0;
-  var date=document.getElementById('inv-date').value;
-  var notes=document.getElementById('inv-notes').value.trim();
-  if(!cat){toast('Select a category'); return;}
-  if(!name){toast('Enter investment name'); return;}
-  if(!amt||amt<=0){toast('Enter valid amount'); return;}
-  if(!D.INV) D.INV=[];
-  D.INV.push({id:Date.now(),cat,name,amt,cur,date,notes});
-  sv(); rInvest();
-  document.getElementById('inv-cat').value='';
-  document.getElementById('inv-name').value='';
-  document.getElementById('inv-amt').value='';
-  document.getElementById('inv-cur').value='';
-  document.getElementById('inv-notes').value='';
-  toast('Investment added!');
+  var cat   = document.getElementById('inv-cat').value;
+  var name  = (document.getElementById('inv-name').value||'').trim();
+  var amtRaw= document.getElementById('inv-amt').value;
+  var curRaw= document.getElementById('inv-cur').value;
+  var date  = document.getElementById('inv-date').value;
+  var notes = (document.getElementById('inv-notes').value||'').trim();
+
+  var amt = parseFloat(amtRaw);
+  var cur = parseFloat(curRaw) || 0;
+
+  if(!cat)            { toast('Please select a category'); return; }
+  if(!name)           { toast('Please enter investment name'); return; }
+  if(isNaN(amt)||amt<=0) { toast('Please enter a valid amount'); return; }
+
+  if(!D.INV) D.INV = [];
+
+  D.INV.push({
+    id:   Date.now(),
+    cat:  cat,
+    name: name,
+    amt:  amt,
+    cur:  cur,
+    date: date,
+    notes:notes
+  });
+
+  sv();
+  rInvest();
+
+  // Clear fields
+  document.getElementById('inv-cat').value  = '';
+  document.getElementById('inv-name').value = '';
+  document.getElementById('inv-amt').value  = '';
+  document.getElementById('inv-cur').value  = '';
+  document.getElementById('inv-notes').value= '';
+
+  if(typeof toast==='function') toast('Investment added!');
 }
 
 function delInv(id){D.INV=(D.INV||[]).filter(function(i){return i.id!==id;}); sv(); rInvest(); toast('Removed');}
 
 function rInvest(){
   var INV=D.INV||[];
-  var total=INV.reduce(function(s,i){return s+i.amt;},0);
+  var total=INV.reduce(function(s,i){var a=parseFloat(i.amt)||0; return s+a;},0);
   var el=function(id){return document.getElementById(id);};
   if(el('inv-total')) el('inv-total').textContent=fmt(total);
   if(el('inv-cnt')) el('inv-cnt').textContent=INV.length;
@@ -1922,8 +1940,8 @@ function rInvest(){
   if(el('inv-list-cnt')) el('inv-list-cnt').textContent=INV.length+' investment'+(INV.length===1?'':'s');
   grid.innerHTML=[...INV].sort(function(a,b){return b.amt-a.amt;}).map(function(inv){
     var m=getMeta(inv.cat);
-    var gain=inv.cur>0?inv.cur-inv.amt:0;
-    var gainPct=inv.cur>0?(inv.cur-inv.amt)/inv.amt*100:0;
+    var gain=(parseFloat(inv.cur)||0)>0?(parseFloat(inv.cur)||0)-(parseFloat(inv.amt)||0):0;
+    var gainPct=(parseFloat(inv.cur)||0)>0?((parseFloat(inv.cur)||0)-(parseFloat(inv.amt)||0))/(parseFloat(inv.amt)||1)*100:0;
     return '<div class="inv-card" style="border-top-color:#'+m.color+'"><button class="inv-del" onclick="delInv('+inv.id+')">✕</button><div style="font-size:1.8rem;margin-bottom:8px">'+m.ico+'</div><div style="font-size:.85rem;font-weight:700;margin-bottom:4px">'+inv.name+'</div><div style="font-size:.7rem;color:#6B7280;margin-bottom:10px">'+inv.cat+(inv.date?' · '+inv.date:'')+'</div><div style="font-size:1.3rem;font-weight:800;color:#'+m.color+';margin-bottom:4px">'+fmt(inv.amt)+'</div><div style="font-size:.72rem;color:#6B7280;margin-bottom:6px">Invested</div>'+(inv.cur>0?'<div style="font-size:.8rem;font-weight:600">Current: <span style="color:#'+m.color+'">'+fmt(inv.cur)+'</span></div><div style="font-size:.75rem;font-weight:700;color:'+(gain>=0?'#3D5C40':'#C96B6B')+'">'+(gain>=0?'▲':'▼')+' '+fmt(Math.abs(gain))+' ('+(gainPct>=0?'+':'')+gainPct.toFixed(1)+'%)</div>':'')+(inv.notes?'<div style="font-size:.72rem;color:#6B7280;margin-top:6px;font-style:italic">'+inv.notes+'</div>':'')+'</div>';
   }).join('');
 }
@@ -2035,199 +2053,62 @@ if (!navigator.onLine) { document.getElementById('offlineBadge').style.display='
 
 
 // ═══════════════════════════════════════════════
-// FIREBASE - REST API (no SDK required)
+// FIREBASE - Authentication + Cloud Sync
 // ═══════════════════════════════════════════════
-var FB_API_KEY   = "AIzaSyDCxttHEIynYdizZqggpai_GA0wk3FciZ4";
-var FB_PROJECT   = "apexion-finance";
-var FB_AUTH_URL  = "https://identitytoolkit.googleapis.com/v1/accounts";
-var FB_FS_URL    = "https://firestore.googleapis.com/v1/projects/" + FB_PROJECT + "/databases/(default)/documents";
+// Safety check
+if (typeof firebase === 'undefined') {
+  console.error('Firebase SDK not loaded!');
+} else {
+var _fbApp = firebase.initializeApp({
+  apiKey: "AIzaSyDCxttHEIynYdizZqggpai_GA0wk3FciZ4",
+  authDomain: "apexion-finance.firebaseapp.com",
+  databaseURL: "https://apexion-finance-default-rtdb.firebaseio.com",
+  projectId: "apexion-finance",
+  storageBucket: "apexion-finance.firebasestorage.app",
+  messagingSenderId: "254900081783",
+  appId: "1:254900081783:web:b34e145f80100f986ea272"
+});
+var _auth = firebase.auth();}
+var _db   = firebase.firestore();
+var _uid  = null;
+var _stmr = null;
 
-// Auth state
-var _idToken     = null;
-var _refreshToken= null;
-var _uid         = null;
-var _stmr        = null;
-var _auth        = true; // truthy so guards pass; real auth via REST below
-var _db          = true;
-
-// Persist session across page reloads
-(function(){
-  try {
-    var s = JSON.parse(localStorage.getItem('_fbSession')||'{}');
-    if (s.idToken && s.uid) {
-      _idToken = s.idToken; _refreshToken = s.refreshToken; _uid = s.uid;
-    }
-  } catch(e){}
-})();
-
-// ── TOKEN REFRESH ──
-function _fbRefresh(cb) {
-  if (!_refreshToken) { cb(false); return; }
-  fetch("https://securetoken.googleapis.com/v1/token?key=" + FB_API_KEY, {
-    method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
-    body:'grant_type=refresh_token&refresh_token=' + encodeURIComponent(_refreshToken)
-  }).then(function(r){ return r.json(); }).then(function(d){
-    if (d.id_token) {
-      _idToken = d.id_token; _refreshToken = d.refresh_token;
-      try { localStorage.setItem('_fbSession', JSON.stringify({idToken:_idToken,refreshToken:_refreshToken,uid:_uid})); } catch(e){}
-      cb(true);
-    } else { cb(false); }
-  }).catch(function(){ cb(false); });
-}
-
-// ── FIRESTORE HELPERS ──
-function _fsGet(path, cb) {
-  console.log('[APX] _fsGet: fetching', FB_FS_URL+'/'+path);
-  fetch(FB_FS_URL + '/' + path, {
-    headers:{'Authorization':'Bearer ' + _idToken}
-  }).then(function(r){
-    console.log('[APX] _fsGet response status:', r.status);
-    if (r.status === 401) {
-      console.log('[APX] _fsGet: 401 - refreshing token');
-      _fbRefresh(function(ok){ if(ok) _fsGet(path,cb); else cb(null); });
-      return null;
-    }
-    if (!r.ok) { 
-      console.log('[APX] _fsGet: error status', r.status);
-      cb(null); return null; 
-    }
-    return r.json();
-  }).then(function(d){ 
-    if(d !== null && d !== undefined) cb(d); 
-  }).catch(function(e){ 
-    console.log('[APX] _fsGet: network error', e); 
-    cb(null); 
-  });
-}
-
-function _fsSet(path, data, cb) {
-  // Convert JS object to Firestore document fields
-  function toFsVal(v) {
-    if (v === null || v === undefined) return {nullValue:null};
-    if (typeof v === 'boolean') return {booleanValue:v};
-    if (typeof v === 'number')  return {doubleValue:v};
-    if (typeof v === 'string')  return {stringValue:v};
-    if (Array.isArray(v))       return {arrayValue:{values:v.map(toFsVal)}};
-    if (typeof v === 'object')  {
-      var fields={};
-      Object.keys(v).forEach(function(k){ fields[k]=toFsVal(v[k]); });
-      return {mapValue:{fields:fields}};
-    }
-    return {stringValue:String(v)};
-  }
-  var fields={};
-  Object.keys(data).forEach(function(k){ fields[k]=toFsVal(data[k]); });
-
-  fetch(FB_FS_URL + '/' + path + '?currentDocument.exists=false&currentDocument.exists=true', {
-    method:'PATCH',
-    headers:{'Authorization':'Bearer '+_idToken,'Content-Type':'application/json'},
-    body:JSON.stringify({fields:fields})
-  }).then(function(r){
-    if (r.status===401) { _fbRefresh(function(ok){ if(ok) _fsSet(path,data,cb); }); return; }
-    if (cb) cb(r.ok);
-  }).catch(function(){ if(cb) cb(false); });
-}
-
-function _fsPatch(path, data, cb) {
-  // PATCH without preconditions - just upsert
-  function toFsVal(v) {
-    if (v === null || v === undefined) return {nullValue:null};
-    if (typeof v === 'boolean') return {booleanValue:v};
-    if (typeof v === 'number')  return {doubleValue:v};
-    if (typeof v === 'string')  return {stringValue:v};
-    if (Array.isArray(v))       return {arrayValue:{values:v.map(toFsVal)}};
-    if (typeof v === 'object')  {
-      var fields={};
-      Object.keys(v).forEach(function(k){ fields[k]=toFsVal(v[k]); });
-      return {mapValue:{fields:fields}};
-    }
-    return {stringValue:String(v)};
-  }
-  var fields={};
-  Object.keys(data).forEach(function(k){ fields[k]=toFsVal(data[k]); });
-  console.log('[APX] _fsPatch: saving to', FB_FS_URL+'/'+path);
-  fetch(FB_FS_URL + '/' + path, {
-    method:'PATCH',
-    headers:{'Authorization':'Bearer '+_idToken,'Content-Type':'application/json'},
-    body:JSON.stringify({fields:fields})
-  }).then(function(r){
-    console.log('[APX] _fsPatch response status:', r.status);
-    if (r.status===401) { _fbRefresh(function(ok){ if(ok) _fsPatch(path,data,cb); }); return; }
-    if (!r.ok) {
-      r.json().then(function(e){ console.error('[APX] Firestore save error:', e.error && e.error.message); }).catch(function(){});
-      if (cb) cb(false);
-    } else {
-      console.log('[APX] _fsPatch: SAVE SUCCESS');
-      if (cb) cb(true);
-    }
-  }).catch(function(e){ console.error('[APX] Firestore network error:', e); if(cb) cb(false); });
-}
-
-// ── PARSE FIRESTORE DOCUMENT TO PLAIN JS ──
-function _fsToJs(doc) {
-  function fromFsVal(v) {
-    if (!v) return null;
-    if ('nullValue'    in v) return null;
-    if ('booleanValue' in v) return v.booleanValue;
-    if ('integerValue' in v) return Number(v.integerValue);
-    if ('doubleValue'  in v) return v.doubleValue;
-    if ('stringValue'  in v) return v.stringValue;
-    if ('arrayValue'   in v) return (v.arrayValue.values||[]).map(fromFsVal);
-    if ('mapValue'     in v) {
-      var o={};
-      Object.keys(v.mapValue.fields||{}).forEach(function(k){ o[k]=fromFsVal(v.mapValue.fields[k]); });
-      return o;
-    }
-    return null;
-  }
-  var out={};
-  Object.keys(doc.fields||{}).forEach(function(k){ out[k]=fromFsVal(doc.fields[k]); });
-  return out;
-}
+// Enable offline persistence
+_db.enablePersistence({synchronizeTabs:true}).catch(function(){});
 
 // ── AUTH STATE LISTENER ──
-// On page load: if we have a cached session, verify it then load data
-window.addEventListener('DOMContentLoaded', function() {
-  if (_uid && _idToken) {
-    // Verify token is still valid by refreshing
-    _fbRefresh(function(ok) {
-      if (ok) {
-        document.getElementById('apxLogin').style.display = 'none';
-        document.body.classList.remove('locked');
-        // Show localStorage data instantly while cloud loads
-        _initApp();
-        _loadCloud();
-      } else {
-        _fbSignOut(true);
-      }
-    });
+_auth.onAuthStateChanged(function(user) {
+  if (user) {
+    _uid = user.uid;
+    document.getElementById('apxLogin').style.display = 'none';
+    document.body.classList.remove('locked');
+    _loadCloud();
   } else {
+    _uid = null;
     document.getElementById('apxLogin').style.display = 'flex';
     document.body.classList.add('locked');
   }
 });
 
 // ── SYNC BADGE ──
-function _showSync(msg, dur) {
-  var el = document.getElementById('syncBadge');
-  if (!el) return;
-  var txt = el.querySelector('#syncMsg') || el;
-  el.style.display = 'flex';
-  try { txt.textContent = msg; } catch(e){}
-  clearTimeout(el._t);
-  el._t = setTimeout(function(){ el.style.display='none'; }, dur||2500);
+function _showSync(msg, ms) {
+  var b = document.getElementById('syncBadge');
+  var t = document.getElementById('syncMsg');
+  if (!b || !t) return;
+  t.textContent = msg;
+  b.style.display = 'flex';
+  clearTimeout(window._syt);
+  window._syt = setTimeout(function(){ b.style.display='none'; }, ms||2500);
 }
 
 // ── LOAD DATA FROM CLOUD ──
 function _loadCloud() {
-  if (!_uid || !_idToken) { console.log('[APX] _loadCloud: no uid/token'); _initApp(); return; }
-  console.log('[APX] _loadCloud: fetching from Firestore for uid='+_uid);
+  if (!_uid) return;
   _showSync('Loading your data...', 8000);
-  _fsGet('users/' + _uid, function(doc) {
-    console.log('[APX] _fsGet response:', doc ? (doc.fields ? 'HAS DATA' : 'NO FIELDS - doc='+JSON.stringify(doc).slice(0,100)) : 'NULL');
-    if (doc && doc.fields) {
-      // Cloud data exists - merge it into D
-      var d = _fsToJs(doc);
+  _db.collection('users').doc(_uid).get()
+  .then(function(doc) {
+    if (doc.exists) {
+      var d = doc.data();
       if (d.E  && d.E.length)   D.E  = d.E;
       if (d.I  && d.I.length)   D.I  = d.I;
       if (d.G  && d.G.length)   D.G  = d.G;
@@ -2240,41 +2121,28 @@ function _loadCloud() {
       if (d.yr)  D.yr  = d.yr;
       if (d.mo)  D.mo  = d.mo;
       try { localStorage.setItem('apx_v6', JSON.stringify(D)); } catch(e){}
-      initSels();
-      updLbls();
-      rDash();
-      _showSync('✓ Cloud data loaded!');
-    } else {
-      // No cloud data - D already has localStorage data from ld() on page load
-      // Push localStorage data up to cloud so other devices get it
-      initSels();
-      updLbls();
-      rDash();
-      if (D.E.length || D.I.length || D.G.length || D.BL.length || D.DB.length) {
-        _showSync('Backing up local data to cloud...', 5000);
-        _saveCloud();
-      } else {
-        _showSync('Ready');
-      }
     }
+    _initApp();
+    _showSync('Data loaded!');
+  })
+  .catch(function(e) {
+    console.log('Load error:', e.message);
+    _initApp();
+    _showSync('Using offline data');
   });
 }
 
 // ── SAVE DATA TO CLOUD ──
 function _saveCloud() {
-  if (!_uid || !_idToken) return;
-  _showSync('Saving...', 4000);
-  var data = {
+  if (!_uid) return;
+  _db.collection('users').doc(_uid).set({
     E:D.E||[], I:D.I||[], G:D.G||[], DB:D.DB||[],
     BL:D.BL||[], SB:D.SB||[], SA:D.SA||[], INV:D.INV||[],
     cur:D.cur||'USD',
     yr:D.yr||new Date().getFullYear(),
     mo:D.mo||'January',
     upd:new Date().toISOString()
-  };
-  _fsPatch('users/' + _uid, data, function(ok) {
-    _showSync(ok !== false ? '✓ Saved to cloud' : '⚠ Save failed - check connection', 2500);
-  });
+  }).catch(function(e){ console.log('Save error:', e.message); });
 }
 
 // ── OVERRIDE sv() ──
@@ -2297,59 +2165,8 @@ function _initApp() {
     var el = document.getElementById(id);
     if (el && t) el.value = t;
   });
-  // Activate dashboard page and nav
-  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('on'); });
-  document.querySelectorAll('.ni').forEach(function(b){ b.classList.remove('on'); });
-  var dashPage = document.getElementById('pg-dashboard');
-  var dashBtn  = document.querySelector('.ni[data-p="dashboard"]');
-  if (dashPage) dashPage.classList.add('on');
-  if (dashBtn)  dashBtn.classList.add('on');
   rDash();
   _addSideBtns();
-}
-
-// ── MANUAL CLOUD SYNC ──
-function _manualLoad() {
-  if (!_uid || !_idToken) { alert('Not signed in'); return; }
-  _showSync('Loading from cloud...', 8000);
-  _fsGet('users/' + _uid, function(doc) {
-    if (!doc) { _showSync('⚠ Could not reach cloud', 3000); return; }
-    if (doc && doc.fields) {
-      var d = _fsToJs(doc);
-      if (d.E  && d.E.length)   D.E  = d.E;
-      if (d.I  && d.I.length)   D.I  = d.I;
-      if (d.G  && d.G.length)   D.G  = d.G;
-      if (d.DB && d.DB.length)  D.DB = d.DB;
-      if (d.BL && d.BL.length)  D.BL = d.BL;
-      if (d.SB && d.SB.length)  D.SB = d.SB;
-      if (d.SA && d.SA.length)  D.SA = d.SA;
-      if (d.INV && d.INV.length) D.INV = d.INV;
-      if (d.cur) D.cur = d.cur;
-      if (d.yr)  D.yr  = d.yr;
-      if (d.mo)  D.mo  = d.mo;
-      try { localStorage.setItem('apx_v6', JSON.stringify(D)); } catch(e){}
-      initSels(); updLbls(); rfr();
-      _showSync('✓ Data loaded from cloud!', 3000);
-    } else {
-      _showSync('⚠ No cloud data found', 3000);
-    }
-  });
-}
-
-function _manualSave() {
-  if (!_uid || !_idToken) { alert('Not signed in'); return; }
-  _showSync('Saving to cloud...', 4000);
-  var data = {
-    E:D.E||[], I:D.I||[], G:D.G||[], DB:D.DB||[],
-    BL:D.BL||[], SB:D.SB||[], SA:D.SA||[], INV:D.INV||[],
-    cur:D.cur||'USD',
-    yr:D.yr||new Date().getFullYear(),
-    mo:D.mo||'January',
-    upd:new Date().toISOString()
-  };
-  _fsPatch('users/' + _uid, data, function(ok) {
-    _showSync(ok !== false ? '✓ Saved to cloud!' : '⚠ Save failed - check console', 3000);
-  });
 }
 
 // ── SIDEBAR BUTTONS ──
@@ -2360,13 +2177,9 @@ function _addSideBtns() {
   var d = document.createElement('div');
   d.id = '_fbBtns';
   d.style.cssText = 'padding:6px 16px 8px;border-top:1px solid rgba(255,255,255,.07);margin-top:6px';
-  var btnStyle = 'display:flex;align-items:center;gap:8px;width:100%;padding:9px 18px;background:none;border:none;font-size:.8rem;font-family:inherit;cursor:pointer;text-align:left;border-radius:6px;transition:.15s;';
-  d.innerHTML = [
-    '<button onclick="_manualLoad()" style="'+btnStyle+'color:rgba(255,255,255,.4)" onmouseenter="this.style.color=\'#93c5fd\'" onmouseleave="this.style.color=\'rgba(255,255,255,.4)\'">&#9729; Load from Cloud</button>',
-    '<button onclick="_manualSave()" style="'+btnStyle+'color:rgba(255,255,255,.4)" onmouseenter="this.style.color=\'#86efac\'" onmouseleave="this.style.color=\'rgba(255,255,255,.4)\'">&#9729; Save to Cloud</button>',
-    '<button onclick="_chPw()" style="'+btnStyle+'color:rgba(255,255,255,.4)" onmouseenter="this.style.color=\'#86efac\'" onmouseleave="this.style.color=\'rgba(255,255,255,.4)\'">&#128273; Change Password</button>',
-    '<button onclick="_fbOut()" style="'+btnStyle+'color:rgba(255,255,255,.4)" onmouseenter="this.style.color=\'#fca5a5\'" onmouseleave="this.style.color=\'rgba(255,255,255,.4)\'">&#128682; Sign Out</button>'
-  ].join('');
+  d.innerHTML =
+    '<button onclick="_chPw()" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 18px;background:none;border:none;color:rgba(255,255,255,.4);font-size:.8rem;font-family:inherit;cursor:pointer;text-align:left;border-radius:6px" onmouseenter="this.style.color=&quot;#86efac&quot;" onmouseleave="this.style.color=&quot;rgba(255,255,255,.4)&quot;">&#128273; Change Password</button>' +
+    '<button onclick="_fbOut()" style="display:flex;align-items:center;gap:10px;width:100%;padding:9px 18px;background:none;border:none;color:rgba(255,255,255,.4);font-size:.8rem;font-family:inherit;cursor:pointer;text-align:left;border-radius:6px" onmouseenter="this.style.color=&quot;#fca5a5&quot;" onmouseleave="this.style.color=&quot;rgba(255,255,255,.4)&quot;">&#128682; Sign Out</button>';
   nav.appendChild(d);
 }
 
@@ -2411,29 +2224,13 @@ function lSignIn() {
   _lBtn('lBtnIn', true, 'Signing in...');
   document.getElementById('lErr').style.display='none';
   document.getElementById('lOk').style.display='none';
-  fetch(FB_AUTH_URL + ":signInWithPassword?key=" + FB_API_KEY, {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({email:em, password:pw, returnSecureToken:true})
-  }).then(function(r){ return r.json(); }).then(function(d) {
-    if (d.error) {
-      _lErr(_fbErr(d.error.message));
-      _lBtn('lBtnIn', false, 'Sign In');
-      return;
-    }
-    _idToken = d.idToken; _refreshToken = d.refreshToken; _uid = d.localId;
-    try { localStorage.setItem('_fbSession', JSON.stringify({idToken:_idToken,refreshToken:_refreshToken,uid:_uid})); } catch(e){}
-    _lOk('Welcome! Loading your dashboard...');
-    setTimeout(function(){
-      console.log('[APX] Login success. uid='+_uid+' token='+(_idToken?'YES':'NO'));
-      document.getElementById('apxLogin').style.display = 'none';
-      document.body.classList.remove('locked');
-      console.log('[APX] Calling _initApp with localStorage data...');
-      _initApp();
-      console.log('[APX] Calling _loadCloud...');
-      _loadCloud();
-    }, 800);
-  }).catch(function() {
-    _lErr('Network error. Check your connection.');
+  // Check Firebase is ready
+  if (!_auth) { _lErr('App loading... Please wait and try again'); _lBtn('lBtnIn',false,'Sign In'); return; }
+  _auth.signInWithEmailAndPassword(em, pw)
+  .then(function(){ _lOk('Welcome! Loading your dashboard...'); })
+  .catch(function(e) {
+    console.log('Login error:', e.code, e.message);
+    _lErr(_fbErr(e.code));
     _lBtn('lBtnIn', false, 'Sign In');
   });
 }
@@ -2444,43 +2241,33 @@ function lSignIn() {
 function lReset() {
   var em = (document.getElementById('lEmail').value||'').trim();
   if (!em) { _lErr('Enter your email above first'); return; }
-  fetch(FB_AUTH_URL + ":sendOobCode?key=" + FB_API_KEY, {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({requestType:'PASSWORD_RESET', email:em})
-  }).then(function(r){ return r.json(); }).then(function(d){
-    if (d.error) { _lErr('Cannot send email. Check the address.'); return; }
-    _lOk('Reset email sent! Check your inbox.');
-  }).catch(function(){ _lErr('Network error. Try again.'); });
+  _auth.sendPasswordResetEmail(em)
+  .then(function(){ _lOk('Reset email sent! Check your inbox.'); })
+  .catch(function(){ _lErr('Cannot send email. Check the address.'); });
 }
 
 // ── SIGN OUT ──
-function _fbSignOut(silent) {
-  _idToken = null; _refreshToken = null; _uid = null;
-  try { localStorage.removeItem('_fbSession'); } catch(e){}
-  document.getElementById('apxLogin').style.display = 'flex';
-  document.body.classList.add('locked');
-  if (!silent && typeof toast === 'function') toast('Signed out successfully');
-}
 function _fbOut() {
-  _fbSignOut(false);
+  _auth.signOut().then(function(){
+    if(typeof toast==='function') toast('Signed out successfully');
+  });
 }
 
 // ── CHANGE PASSWORD ──
 function _chPw() {
-  if (!_idToken) return;
+  var user = _auth.currentUser;
+  if (!user) return;
   var np = prompt('New password (6+ characters):');
   if (!np || np.length<6) { alert('Need 6+ characters'); return; }
   var np2 = prompt('Confirm new password:');
   if (np !== np2) { alert('Passwords do not match'); return; }
-  fetch(FB_AUTH_URL + ":update?key=" + FB_API_KEY, {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({idToken:_idToken, password:np, returnSecureToken:true})
-  }).then(function(r){ return r.json(); }).then(function(d){
-    if (d.error) { alert('Error: ' + d.error.message); return; }
-    _idToken = d.idToken; _refreshToken = d.refreshToken;
-    try { localStorage.setItem('_fbSession', JSON.stringify({idToken:_idToken,refreshToken:_refreshToken,uid:_uid})); } catch(e){}
-    alert('Password changed successfully!');
-  }).catch(function(){ alert('Network error. Try again.'); });
+  user.updatePassword(np)
+  .then(function(){ alert('Password changed successfully!'); })
+  .catch(function(e){
+    if (e.code==='auth/requires-recent-login')
+      alert('Please sign out and sign in again first.');
+    else alert('Error: '+e.message);
+  });
 }
 
 // ── ENTER KEY SUPPORT ──
@@ -2491,26 +2278,8 @@ document.addEventListener('DOMContentLoaded', function(){
 // ═══════════════════════════════════════════════
 
 window.addEventListener('load', function() {
-  // Load localStorage data immediately - before any async/cloud
-  ld();
-  initSels();
-  updLbls();
-  // If session exists, render dashboard immediately with localStorage data
-  // Cloud data will re-render on top when it arrives
-  if (_uid && _idToken) {
-    var dashPage = document.getElementById('pg-dashboard');
-    var dashBtn  = document.querySelector('.ni[data-p="dashboard"]');
-    if (dashPage) { 
-      document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('on'); });
-      dashPage.classList.add('on'); 
-    }
-    if (dashBtn) {
-      document.querySelectorAll('.ni').forEach(function(b){ b.classList.remove('on'); });
-      dashBtn.classList.add('on');
-    }
-    rDash();
-  }
-  // Focus email field
+  // Firebase onAuthStateChanged handles app init after login
+  // Just focus email field
   var emailEl = document.getElementById('lEmail');
   if (emailEl) emailEl.focus();
 });
@@ -2518,6 +2287,17 @@ window.addEventListener('load', function() {
 </script>
 
 <script>
+// ══ SERVICE WORKER REGISTRATION ══
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('sw.js').then(function(reg){
+      // SW registered - app works offline
+    }).catch(function(err){
+      console.warn('SW registration failed:',err);
+    });
+  });
+}
+
 // ══ OFFLINE / ONLINE INDICATOR ══
 (function(){
   function showStatus(online){
