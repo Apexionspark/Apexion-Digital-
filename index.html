@@ -435,12 +435,11 @@ body.locked { overflow:hidden; }
 @keyframes sPulse { 0%,100%{opacity:1}50%{opacity:.3} }
 
 
-/* === DARK MODE BADGE + CALENDAR FIXES === */
+/* === DARK MODE FIXES === */
 body.dark .bi{background:rgba(107,143,113,.25)!important;color:#86efac!important}
 body.dark .be{background:rgba(201,107,107,.25)!important;color:#fca5a5!important}
 body.dark .bn{background:rgba(255,255,255,.1)!important;color:rgba(255,255,255,.6)!important}
 body.dark .bok{background:rgba(107,143,113,.25)!important;color:#86efac!important}
-body.dark .bw{background:rgba(184,147,42,.25)!important;color:#fde68a!important}
 body.dark .chip{background:rgba(255,255,255,.08)!important;color:rgba(255,255,255,.8)!important}
 body.dark td{color:#fff!important}
 body.dark th{color:rgba(255,255,255,.5)!important}
@@ -455,6 +454,9 @@ body.dark .dd-meta{color:rgba(255,255,255,.5)!important}
 body.dark .dd-empty{color:rgba(255,255,255,.4)!important}
 
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 </head>
 <body class="locked">
 
@@ -1021,9 +1023,6 @@ body.dark .dd-empty{color:rgba(255,255,255,.4)!important}
   </div>
 </div>
 <div class="toast" id="toast"></div>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
 <script>
 // ══ CURRENCIES ══
@@ -1739,7 +1738,7 @@ function calcProp(){
 // SAVINGS ACCOUNT
 // ══════════════════════════════════════════════
 function rSavAcct(){
-  const entries = D.savAcct || [];
+  const entries = D.SA || [];
   const el = id => document.getElementById(id);
 
   // Calculate totals
@@ -1801,8 +1800,8 @@ function addSavEntry(){
   const desc = document.getElementById('sav-desc').value.trim();
   if(!date){ toast('⚠️ Please select a date'); return; }
   if(!amt || amt <= 0){ toast('⚠️ Please enter a valid amount'); return; }
-  if(!D.savAcct) D.savAcct = [];
-  D.savAcct.push({id: Date.now(), date, type, amount: amt, description: desc});
+  if(!D.SA) D.SA = [];
+  D.SA.push({id: Date.now(), date, type, amount: amt, description: desc});
   sv(); rSavAcct();
   document.getElementById('sav-amt').value = '';
   document.getElementById('sav-desc').value = '';
@@ -1810,16 +1809,16 @@ function addSavEntry(){
 }
 
 function delSavEntry(id){
-  if(!D.savAcct) return;
-  D.savAcct = D.savAcct.filter(e => e.id !== id);
+  if(!D.SA) return;
+  D.SA = D.SA.filter(e => e.id !== id);
   sv(); rSavAcct();
   toast('Entry removed');
 }
 
 function clearSavAcct(){
-  if(!D.savAcct || !D.savAcct.length){ toast('No entries to clear'); return; }
+  if(!D.SA || !D.SA.length){ toast('No entries to clear'); return; }
   if(confirm('Clear ALL savings entries? This cannot be undone!')){
-    D.savAcct = [];
+    D.SA = [];
     sv(); rSavAcct();
     toast('All savings entries cleared');
   }
@@ -1851,8 +1850,8 @@ function saveSavModal(){
   const desc = document.getElementById('sav-modal-desc').value.trim();
   const date = document.getElementById('sav-modal-date').value || today();
   if(!amt || amt <= 0){ toast('⚠️ Enter a valid amount'); return; }
-  if(!D.savAcct) D.savAcct = [];
-  D.savAcct.push({id: Date.now(), date, type, amount: amt, description: desc});
+  if(!D.SA) D.SA = [];
+  D.SA.push({id: Date.now(), date, type, amount: amt, description: desc});
   sv(); closeSavModal(); rSavAcct();
   toast(type === 'add' ? '✓ ' + fmt(amt) + ' added to savings! 💰' : '✓ ' + fmt(amt) + ' withdrawn from savings!');
 }
@@ -2076,9 +2075,7 @@ if (!navigator.onLine) { document.getElementById('offlineBadge').style.display='
 // FIREBASE - Authentication + Cloud Sync
 // ═══════════════════════════════════════════════
 // Safety check
-
-// Firebase vars (initialized in window load)
-var _fbApp=null, _auth=null, _db=null, _uid=null, _stmr=null;
+var _fbApp=null,_auth=null,_db=null,_uid=null,_stmr=null;
 
 // ── SYNC BADGE ──
 function _showSync(msg, ms) {
@@ -2268,7 +2265,26 @@ document.addEventListener('DOMContentLoaded', function(){
 // ═══════════════════════════════════════════════
 
 window.addEventListener('load', function() {
-  // Init Firebase after all scripts loaded
+  // Check if Firebase SDK loaded
+  var fbStatus = document.getElementById('fbStatus');
+  if (typeof firebase === 'undefined') {
+    if (fbStatus) {
+      fbStatus.style.display = 'block';
+      fbStatus.style.color = '#fca5a5';
+      fbStatus.textContent = 'Note: Open from https:// URL for cloud sync. Local file mode uses offline storage only.';
+    }
+    // Fallback: show app without Firebase
+    document.getElementById('apxLogin').style.display = 'none';
+    document.body.classList.remove('locked');
+    loadMode(); ld(); initSels(); updLbls();
+    var t = typeof today==='function' ? today() : '';
+    ['ed','id2','sav-date','inv-date'].forEach(function(id){
+      var el=document.getElementById(id); if(el&&t) el.value=t;
+    });
+    rDash();
+    return;
+  }
+  if (fbStatus) fbStatus.style.display = 'block';
   try {
     _fbApp = firebase.initializeApp({
       apiKey: "AIzaSyDCxttHEIynYdizZqggpai_GA0wk3FciZ4",
