@@ -435,11 +435,12 @@ body.locked { overflow:hidden; }
 @keyframes sPulse { 0%,100%{opacity:1}50%{opacity:.3} }
 
 
-/* === DARK MODE FIXES === */
+/* === DARK MODE BADGE + CALENDAR FIXES === */
 body.dark .bi{background:rgba(107,143,113,.25)!important;color:#86efac!important}
 body.dark .be{background:rgba(201,107,107,.25)!important;color:#fca5a5!important}
 body.dark .bn{background:rgba(255,255,255,.1)!important;color:rgba(255,255,255,.6)!important}
 body.dark .bok{background:rgba(107,143,113,.25)!important;color:#86efac!important}
+body.dark .bw{background:rgba(184,147,42,.25)!important;color:#fde68a!important}
 body.dark .chip{background:rgba(255,255,255,.08)!important;color:rgba(255,255,255,.8)!important}
 body.dark td{color:#fff!important}
 body.dark th{color:rgba(255,255,255,.5)!important}
@@ -454,9 +455,6 @@ body.dark .dd-meta{color:rgba(255,255,255,.5)!important}
 body.dark .dd-empty{color:rgba(255,255,255,.4)!important}
 
 </style>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 </head>
 <body class="locked">
 
@@ -1023,6 +1021,9 @@ body.dark .dd-empty{color:rgba(255,255,255,.4)!important}
   </div>
 </div>
 <div class="toast" id="toast"></div>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
 <script>
 // ══ CURRENCIES ══
@@ -1199,6 +1200,11 @@ function sv(){
   } catch(e) {
     console.log('Storage error:', e);
   }
+  // Sync to Firebase cloud
+  if (_uid) {
+    clearTimeout(window._stmr);
+    window._stmr = setTimeout(_saveCloud, 2000);
+  }
 }
 
 // ══ FORMAT ══
@@ -1349,6 +1355,23 @@ function addGoal(){
   ['gn','gt','gsf','gm'].forEach(id=>document.getElementById(id).value='');toast('✓ Goal added! 🎯');
 }
 function updG(id,v){const g=D.G.find(g=>g.id===id);if(g){g.saved=parseFloat(v)||0;sv();rSav();}}
+function addToGoal(id){
+  var g = D.G.find(function(x){return x.id===id;});
+  if(!g) return;
+  var remaining = g.target - g.saved;
+  var amt = prompt('Add money to "' + g.name + '"\nSaved: ' + fmt(g.saved) + ' of ' + fmt(g.target) + '\nRemaining: ' + fmt(remaining));
+  if(amt===null) return;
+  amt = parseFloat(amt);
+  if(isNaN(amt)||amt<=0){toast('Enter a valid amount');return;}
+  g.saved = Math.min(g.target, g.saved + amt);
+  sv(); rSav();
+  if(g.saved >= g.target){
+    toast('🎉 Goal "' + g.name + '" achieved!');
+  } else {
+    toast('✅ ' + fmt(amt) + ' added to ' + g.name + '!');
+  }
+}
+
 function delG(id){D.G=D.G.filter(g=>g.id!==id);sv();rSav();toast('Goal removed');}
 function rSav(){
   const tT=sm(D.G,'target'),tS=sm(D.G,'saved'),op=tT>0?Math.min(tS/tT*100,100):0;
@@ -1357,7 +1380,10 @@ function rSav(){
   const pc={High:'var(--red)',Medium:'var(--gold)',Low:'var(--sage)'},gc=$('gCards');
   if(!D.G.length){gc.innerHTML='<div class="empty"><span class="ei">🎯</span>No goals yet!</div>';return;}
   gc.innerHTML=D.G.map(g=>{const p=g.target>0?Math.min(g.saved/g.target*100,100):0,r=Math.max(g.target-g.saved,0),mo=g.monthly>0?Math.ceil(r/g.monthly):null,done=p>=100;
-    return`<div class="gc${done?' done':''}"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px"><div><div style="font-size:.86rem;font-weight:700">${g.name}</div><div style="font-size:.68rem;color:var(--mid);margin-top:2px">${g.category} · <span style="color:${pc[g.priority]};font-weight:700">${g.priority}</span></div></div><button class="btn btn-sm btn-gh btn-ico" onclick="delG(${g.id})" style="color:var(--red);border-color:transparent;flex-shrink:0">✕</button></div><div style="font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;color:var(--sage-d)">${fmt(g.saved)}</div><div style="font-size:.68rem;color:var(--mid);margin-bottom:8px">of ${fmt(g.target)}${mo?' · ~'+mo+' months':''}</div><div class="pri"><span style="color:var(--mid)">${p.toFixed(1)}%</span><span style="color:var(--sage-d);font-weight:700">${fmt(r)} left</span></div><div class="prt"><div class="prf" style="width:${p}%;background:linear-gradient(90deg,var(--sage-l),var(--sage-d))"></div></div><input type="number" style="margin-top:9px;width:100%;padding:9px 11px;font-size:15px;background:var(--cream);border:1.5px solid var(--cream-d);border-radius:6px;font-family:inherit;color:var(--dark);outline:none;min-height:44px" placeholder="Update saved amount" value="${g.saved}" inputmode="decimal" onchange="updG(${g.id},this.value)"><div class="gdone"><div style="font-family:'Playfair Display',serif;font-size:1.1rem;color:#fff;font-weight:700">🎉 Complete!</div></div></div>`;
+    return`<div class="gc${done?' done':''}"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px"><div><div style="font-size:.86rem;font-weight:700">${g.name}</div><div style="font-size:.68rem;color:var(--mid);margin-top:2px">${g.category} · <span style="color:${pc[g.priority]};font-weight:700">${g.priority}</span></div></div><div style="display:flex;gap:4px">
+            <button class="btn btn-sm btn-g" onclick="addToGoal(${g.id})" style="font-size:.7rem;padding:4px 8px">+ Add</button>
+            <button class="btn btn-sm btn-gh btn-ico" onclick="delG(${g.id})" style="color:var(--red);border-color:transparent;flex-shrink:0">✕</button>
+          </div></div><div style="font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;color:var(--sage-d)">${fmt(g.saved)}</div><div style="font-size:.68rem;color:var(--mid);margin-bottom:8px">of ${fmt(g.target)}${mo?' · ~'+mo+' months':''}</div><div class="pri"><span style="color:var(--mid)">${p.toFixed(1)}%</span><span style="color:var(--sage-d);font-weight:700">${fmt(r)} left</span></div><div class="prt"><div class="prf" style="width:${p}%;background:linear-gradient(90deg,var(--sage-l),var(--sage-d))"></div></div><input type="number" style="margin-top:9px;width:100%;padding:9px 11px;font-size:15px;background:var(--cream);border:1.5px solid var(--cream-d);border-radius:6px;font-family:inherit;color:var(--dark);outline:none;min-height:44px" placeholder="Update saved amount" value="${g.saved}" inputmode="decimal" onchange="updG(${g.id},this.value)"><div class="gdone"><div style="font-family:'Playfair Display',serif;font-size:1.1rem;color:#fff;font-weight:700">🎉 Complete!</div></div></div>`;
   }).join('');
 }
 
@@ -1370,11 +1396,64 @@ function addDebt(){
 }
 function delDB(id){D.DB=D.DB.filter(d=>d.id!==id);sv();rDebt();toast('Removed');}
 function rDebt(){
-  const $=id=>document.getElementById(id);$('d-tot').textContent=fmt(sm(D.DB,'owed'));$('d-min').textContent=fmt(sm(D.DB,'min'));
-  const dl=$('dList');if(!D.DB.length){dl.innerHTML='<div class="empty"><span class="ei">💰</span>No debts tracked</div>';return;}
-  dl.innerHTML=D.DB.map(d=>{const pmt=d.min+d.extra,mos=pmt>0?Math.ceil(d.owed/pmt):'—';
-    return`<div class="di"><div><div style="font-size:.85rem;font-weight:700">${d.name} <span class="bdg bn" style="margin-left:4px">${d.type}</span></div><div style="font-size:.7rem;color:var(--mid);margin-top:3px">${d.rate}% APR · Min: ${fmt(d.min)}/mo${d.extra>0?' + '+fmt(d.extra)+' extra':''}</div><div class="prt" style="height:5px;margin-top:9px"><div class="prf" style="width:12%;background:var(--sage)"></div></div><div style="font-size:.66rem;color:var(--mid);margin-top:2px">Est. payoff: ~${mos} months</div></div><div style="text-align:right"><div style="font-family:'JetBrains Mono',monospace;font-size:.95rem;font-weight:700;color:var(--red)">${fmt(d.owed)}</div><div style="font-size:.65rem;color:var(--mid)">owed</div><button class="btn btn-sm btn-gh" onclick="delDB(${d.id})" style="margin-top:7px;color:var(--red);border-color:transparent;font-size:.7rem">Remove</button></div></div>`;
+  const $=id=>document.getElementById(id);
+  $('d-tot').textContent=fmt(sm(D.DB,'owed'));
+  $('d-min').textContent=fmt(sm(D.DB,'min'));
+  const dl=$('dList');
+  if(!D.DB.length){dl.innerHTML='<div class="empty"><span class="ei">💰</span>No debts tracked</div>';return;}
+  dl.innerHTML=D.DB.map(d=>{
+    const pmt=d.min+d.extra, mos=pmt>0?Math.ceil(d.owed/pmt):'—';
+    const orig=d.original||d.owed;
+    const paid=orig-d.owed;
+    const pct=Math.min(100,Math.round((paid/orig)*100));
+    return`<div class="di">
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          <span style="font-size:.85rem;font-weight:700">${d.name}</span>
+          <span class="bdg bn">${d.type}</span>
+        </div>
+        <div style="font-size:.7rem;color:var(--mid);margin-top:3px">${d.rate}% APR · Min: ${fmt(d.min)}/mo${d.extra>0?' + '+fmt(d.extra)+' extra':''}</div>
+        <div style="margin-top:8px">
+          <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--mid);margin-bottom:3px">
+            <span>Paid: ${fmt(paid)}</span><span>${pct}% complete</span>
+          </div>
+          <div class="prt" style="height:7px"><div class="prf" style="width:${pct}%;background:var(--sage);transition:.3s"></div></div>
+        </div>
+        <div style="font-size:.66rem;color:var(--mid);margin-top:3px">Est. payoff: ~${mos} months remaining</div>
+        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+          <button class="btn btn-sm btn-g" onclick="makePayment(${d.id})" style="font-size:.72rem;padding:4px 10px">💳 Make Payment</button>
+          <button class="btn btn-sm btn-gh" onclick="delDB(${d.id})" style="font-size:.72rem;padding:4px 10px;color:var(--red)">Remove</button>
+        </div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;margin-left:12px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.95rem;font-weight:700;color:var(--red)">${fmt(d.owed)}</div>
+        <div style="font-size:.65rem;color:var(--mid)">remaining</div>
+        <div style="font-size:.65rem;color:var(--sage);margin-top:2px">of ${fmt(orig)}</div>
+      </div>
+    </div>`;
   }).join('');
+}
+
+function makePayment(id){
+  var d = D.DB.find(function(x){return x.id===id;});
+  if(!d) return;
+  var amt = prompt('Payment amount for ' + d.name + ' - Remaining: ' + fmt(d.owed));
+  if(amt===null) return;
+  amt = parseFloat(amt);
+  if(isNaN(amt)||amt<=0){toast('⚠️ Please enter a valid amount');return;}
+  if(amt>d.owed){
+    if(!confirm('Payment (' + fmt(amt) + ') is more than owed (' + fmt(d.owed) + '). Mark as fully paid?')) return;
+    amt = d.owed;
+  }
+  if(!d.original) d.original = d.owed + amt;
+  d.owed = Math.max(0, d.owed - amt);
+  if(d.owed===0){
+    toast('🎉 ' + d.name + ' is fully paid off!');
+    D.DB = D.DB.filter(function(x){return x.id!==id;});
+  } else {
+    toast('✅ Payment of ' + fmt(amt) + ' recorded!');
+  }
+  sv(); rDebt();
 }
 
 // ══ BILLS ══
@@ -1404,7 +1483,15 @@ function rSubs(){
   $('s-mo').textContent=fmt(mo);$('s-an').textContent=fmt(mo*12);$('s-ac').textContent=ac.length;
   const sl=$('sList');if(!D.SB.length){sl.innerHTML='<div class="empty"><span class="ei">📱</span>No subscriptions yet</div>';return;}
   const sc={Active:'bok',Paused:'bw',Cancelled:'bn'};
-  sl.innerHTML=D.SB.map(s=>`<div class="sub-item"><div class="sub-ico">${SICO[s.category]||'📦'}</div><div style="flex:1;min-width:0"><div style="font-size:.83rem;font-weight:600">${s.name}</div><div style="font-size:.68rem;color:var(--mid);margin-top:1px">${s.category}${s.renewal?' · '+s.renewal:''}</div></div><div style="text-align:right;flex-shrink:0"><div style="font-family:'JetBrains Mono',monospace;font-size:.86rem;font-weight:700">${fmt(s.cost)}<span style="font-size:.63rem;color:var(--mid);font-weight:400">/mo</span></div><div style="font-size:.65rem;color:var(--mid)">${fmt(s.cost*12)}/yr</div><span class="bdg ${sc[s.status]||'bn'}" style="margin-top:3px;display:inline-flex">${s.status}</span></div><button class="btn btn-sm btn-gh btn-ico" onclick="delSB(${s.id})" style="color:var(--red);border-color:transparent;margin-left:6px">✕</button></div>`).join('');
+  sl.innerHTML=D.SB.map(s=>`<div class="sub-item"><div class="sub-ico">${SICO[s.category]||'📦'}</div><div style="flex:1;min-width:0"><div style="font-size:.83rem;font-weight:600">${s.name}</div><div style="font-size:.68rem;color:var(--mid);margin-top:1px">${s.category}${s.renewal?' · '+s.renewal:''}</div></div><div style="text-align:right;flex-shrink:0"><div style="font-family:'JetBrains Mono',monospace;font-size:.86rem;font-weight:700">${fmt(s.cost)}<span style="font-size:.63rem;color:var(--mid);font-weight:400">/mo</span></div><div style="font-size:.65rem;color:var(--mid)">${fmt(s.cost*12)}/yr</div><span class="bdg ${sc[s.status]||'bn'}" style="margin-top:3px;display:inline-flex">${s.status}</span>
+          <div style="display:flex;gap:4px;margin-top:6px;justify-content:flex-end">
+            ${s.status==='Active'?`<button class="btn btn-sm btn-gh" onclick="setSBStatus(${s.id},'Paused')" style="font-size:.65rem;padding:3px 7px">⏸ Pause</button><button class="btn btn-sm btn-gh" onclick="setSBStatus(${s.id},'Cancelled')" style="font-size:.65rem;padding:3px 7px;color:var(--red)">✕ Cancel</button>`:''}
+            ${s.status==='Paused'?`<button class="btn btn-sm btn-g" onclick="setSBStatus(${s.id},'Active')" style="font-size:.65rem;padding:3px 7px">▶ Reactivate</button><button class="btn btn-sm btn-gh" onclick="setSBStatus(${s.id},'Cancelled')" style="font-size:.65rem;padding:3px 7px;color:var(--red)">✕ Cancel</button>`:''}
+            ${s.status==='Cancelled'?`<button class="btn btn-sm btn-g" onclick="setSBStatus(${s.id},'Active')" style="font-size:.65rem;padding:3px 7px">↩ Reactivate</button>`:''}
+            <button class="btn btn-sm btn-gh" onclick="delSB(${s.id})" style="color:var(--red);border-color:transparent;font-size:.65rem;padding:3px 7px">🗑</button>
+          </div>
+        </div>
+      </div>`).join('');
 }
 
 // ══ CALENDAR ══
@@ -1737,6 +1824,15 @@ function calcProp(){
 // ══════════════════════════════════════════════
 // SAVINGS ACCOUNT
 // ══════════════════════════════════════════════
+function setSBStatus(id, status){
+  var s = D.SB.find(function(x){return x.id===id;});
+  if(!s) return;
+  s.status = status;
+  sv(); rSubs();
+  var msgs = {Active:'▶ Subscription reactivated!', Paused:'⏸ Subscription paused!', Cancelled:'✕ Subscription cancelled!'};
+  toast(msgs[status]||'Updated!');
+}
+
 function rSavAcct(){
   const entries = D.SA || [];
   const el = id => document.getElementById(id);
@@ -2074,8 +2170,9 @@ if (!navigator.onLine) { document.getElementById('offlineBadge').style.display='
 // ═══════════════════════════════════════════════
 // FIREBASE - Authentication + Cloud Sync
 // ═══════════════════════════════════════════════
-// Safety check
-var _fbApp=null,_auth=null,_db=null,_uid=null,_stmr=null;
+// Firebase init handled in window.addEventListener load
+
+
 
 // ── SYNC BADGE ──
 function _showSync(msg, ms) {
@@ -2264,53 +2361,26 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 // ═══════════════════════════════════════════════
 
+
+var _fbApp=null, _auth=null, _db=null, _uid=null, _stmr=null;
 window.addEventListener('load', function() {
-  // Check if Firebase SDK loaded
-  var fbStatus = document.getElementById('fbStatus');
-  if (typeof firebase === 'undefined') {
-    if (fbStatus) {
-      fbStatus.style.display = 'block';
-      fbStatus.style.color = '#fca5a5';
-      fbStatus.textContent = 'Note: Open from https:// URL for cloud sync. Local file mode uses offline storage only.';
-    }
-    // Fallback: show app without Firebase
-    document.getElementById('apxLogin').style.display = 'none';
+  if(typeof firebase!=='undefined'){
+    try{
+      firebase.initializeApp({apiKey:"AIzaSyDCxttHEIynYdizZqggpai_GA0wk3FciZ4",authDomain:"apexion-finance.firebaseapp.com",databaseURL:"https://apexion-finance-default-rtdb.firebaseio.com",projectId:"apexion-finance",storageBucket:"apexion-finance.firebasestorage.app",messagingSenderId:"254900081783",appId:"1:254900081783:web:b34e145f80100f986ea272"});
+      _auth=firebase.auth(); _db=firebase.firestore();
+            _auth.onAuthStateChanged(function(user){
+        if(user){_uid=user.uid;document.getElementById('apxLogin').style.display='none';document.body.classList.remove('locked');_loadCloud();}
+        else{_uid=null;document.getElementById('apxLogin').style.display='flex';document.body.classList.add('locked');}
+      });
+    }catch(e){console.error('Firebase:',e.message);}
+  } else {
+    document.getElementById('apxLogin').style.display='none';
     document.body.classList.remove('locked');
-    loadMode(); ld(); initSels(); updLbls();
-    var t = typeof today==='function' ? today() : '';
-    ['ed','id2','sav-date','inv-date'].forEach(function(id){
-      var el=document.getElementById(id); if(el&&t) el.value=t;
-    });
+    loadMode();ld();initSels();updLbls();
+    var t=typeof today==='function'?today():'';
+    ['ed','id2','sav-date','inv-date'].forEach(function(id){var el=document.getElementById(id);if(el&&t)el.value=t;});
     rDash();
-    return;
   }
-  if (fbStatus) fbStatus.style.display = 'block';
-  try {
-    _fbApp = firebase.initializeApp({
-      apiKey: "AIzaSyDCxttHEIynYdizZqggpai_GA0wk3FciZ4",
-      authDomain: "apexion-finance.firebaseapp.com",
-      databaseURL: "https://apexion-finance-default-rtdb.firebaseio.com",
-      projectId: "apexion-finance",
-      storageBucket: "apexion-finance.firebasestorage.app",
-      messagingSenderId: "254900081783",
-      appId: "1:254900081783:web:b34e145f80100f986ea272"
-    });
-    _auth = firebase.auth();
-    _db   = firebase.firestore();
-    _db.enablePersistence({synchronizeTabs:true}).catch(function(){});
-    _auth.onAuthStateChanged(function(user) {
-      if (user) {
-        _uid = user.uid;
-        document.getElementById('apxLogin').style.display = 'none';
-        document.body.classList.remove('locked');
-        _loadCloud();
-      } else {
-        _uid = null;
-        document.getElementById('apxLogin').style.display = 'flex';
-        document.body.classList.add('locked');
-      }
-    });
-  } catch(e) { console.error('Firebase error:', e.message); }
 
   // Firebase onAuthStateChanged handles app init after login
   // Just focus email field
